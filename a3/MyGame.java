@@ -30,6 +30,7 @@ import java.util.Arrays;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.*;
 import tage.nodeControllers.RotationController;
+import tage.nodeControllers.ScaleController;
 
 public class MyGame extends VariableFrameRateGame {
 
@@ -147,7 +148,8 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadShapes() {
-        dolS = new ImportedModel("dolphinHighPoly.obj");
+        // dolS = new ImportedModel("dolphinHighPoly.obj");
+        dolS = new ImportedModel("rat.obj");
 
         // planS1 = new Sphere();
         // planS2 = new Sphere();
@@ -171,7 +173,8 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadTextures() {
-        doltx = new TextureImage("Dolphin_HighPolyUV.jpg");
+        // doltx = new TextureImage("Dolphin_HighPolyUV.jpg");
+        doltx = new TextureImage("rat.png");
         brick = new TextureImage("brick1.jpg");
         gas = new TextureImage("gaseous.jpg");
         bluebrick = new TextureImage("bluebrick.jpg");
@@ -633,7 +636,6 @@ public class MyGame extends VariableFrameRateGame {
         }
         return false;
     }
-
 
     public void hideXYZ() {
         // System.out.println("toggling XYZ");
