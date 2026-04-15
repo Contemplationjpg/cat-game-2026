@@ -11,9 +11,9 @@ public class GhostAvatar extends GameObject {
 
     private UUID id;
 
-    public GhostAvatar(UUID id, ObjShape s, TextureImage t, Vector3f p) {
+    public GhostAvatar(UUID newId, ObjShape s, TextureImage t, Vector3f p) {
         super(GameObject.root(), s, t);
-        this.id = id;
+        id = newId;
         setLocalLocation(p);
     }
 

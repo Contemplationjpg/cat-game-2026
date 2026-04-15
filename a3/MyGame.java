@@ -76,6 +76,10 @@ public class MyGame extends VariableFrameRateGame {
     private GameObject plane;
     private ObjShape planeS;
 
+    // private GameObject sphere;
+    private ObjShape tableS;
+    private GameObject testTables[][];
+
     private Light lightP1, lightP2, lightP3, lightH;
 
     private InputManager im;
@@ -90,7 +94,6 @@ public class MyGame extends VariableFrameRateGame {
     private Camera cam, overheadCam;
     private Viewport camVp, overheadVp;
 
-    private NodeController sc1, sc2, sc3, rc1, rc2, rc3;
     String dispStr1 = "";
     String dispStr2 = "";
 
@@ -106,9 +109,21 @@ public class MyGame extends VariableFrameRateGame {
     private boolean gameWon;
     private boolean gameLost;
 
+    private Tile[][] grid; //grid[x][y]
+    private final int gridWidth = 10;
+    private final int gridHeight = 6;
+    private final float tileWidth = 10.0f;
+    private final float tileHeight = 10.0f;
+
+    private int mountainsBox; //skybox
+
+    private GameObject terr;
+    private ObjShape terrS;
+    private TextureImage grass;
+    public TextureImage grassHM;
+
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
-        gm = new GhostManager(this);
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
         if (protocol.toUpperCase().compareTo("TCP") == 0) {
@@ -120,6 +135,12 @@ public class MyGame extends VariableFrameRateGame {
 
     public MyGame() {
         super();
+    }
+
+    @Override
+    public void shutdown() {
+        System.out.println("shutting down");
+        protClient.sendByeMessage();
     }
 
     public static void main(String[] args) {
@@ -136,30 +157,32 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void createViewports() {
         (engine.getRenderSystem()).addViewport("MAIN", 0, 0, 1f, 1f);
-        (engine.getRenderSystem()).addViewport("OVERHEAD", 0.65f, 0.0f, 0.35f, 0.35f);
+        // (engine.getRenderSystem()).addViewport("OVERHEAD", 0.65f, 0.0f, 0.35f, 0.35f);
 
         camVp = (engine.getRenderSystem()).getViewport("MAIN");
-        overheadVp = (engine.getRenderSystem()).getViewport("OVERHEAD");
+        // overheadVp = (engine.getRenderSystem()).getViewport("OVERHEAD");
         cam = (engine.getRenderSystem().getViewport("MAIN").getCamera());
-        overheadCam = (engine.getRenderSystem().getViewport("OVERHEAD").getCamera());
+        // overheadCam = (engine.getRenderSystem().getViewport("OVERHEAD").getCamera());
 
-        overheadVp.setHasBorder(true);
-        overheadVp.setBorderWidth(3);
-        overheadVp.setBorderColor(0f, 1f, 0f);
-
-        overheadCam.setLocation(new Vector3f(0, 15, 0));
-        overheadCam.setU(new Vector3f(1, 0, 0));
-        overheadCam.setV(new Vector3f(0, 0, -1));
-        overheadCam.setN(new Vector3f(0, -1, 0));
-
+        // overheadVp.setHasBorder(true);
+        // overheadVp.setBorderWidth(3);
+        // overheadVp.setBorderColor(0f, 1f, 0f);
+        // overheadCam.setLocation(new Vector3f(0, 15, 0));
+        // overheadCam.setU(new Vector3f(1, 0, 0));
+        // overheadCam.setV(new Vector3f(0, 0, -1));
+        // overheadCam.setN(new Vector3f(0, -1, 0));
     }
 
     @Override
     public void loadShapes() {
         // dolS = new ImportedModel("dolphinHighPoly.obj");
         dolS = new ImportedModel("rat.obj");
+        tableS = new ImportedModel("table.obj");
 
         planeS = new Plane();
+
+        terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
+
     }
 
     @Override
@@ -170,6 +193,15 @@ public class MyGame extends VariableFrameRateGame {
         gas = new TextureImage("gaseous.jpg");
         bluebrick = new TextureImage("bluebrick.jpg");
         purplebrick = new TextureImage("purplebrick.jpg");
+        grass = new TextureImage("grass.png");
+        grassHM = new TextureImage("grassHM.png");
+    }
+
+    @Override
+    public void loadSkyBoxes() {
+        mountainsBox = (engine.getSceneGraph()).loadCubeMap("mountains");
+        (engine.getSceneGraph()).setActiveSkyBoxTexture(mountainsBox);
+        (engine.getSceneGraph()).setSkyBoxEnabled(true);
     }
 
     @Override
@@ -183,9 +215,53 @@ public class MyGame extends VariableFrameRateGame {
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
 
-        plane = new GameObject(GameObject.root(), planeS, gas);
-        Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
-        plane.setLocalScale(initScalePlane);
+        // plane = new GameObject(GameObject.root(), planeS, gas);
+        // Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
+        // Matrix4f initTransPlane = (new Matrix4f()).translation(0, -2, 0);
+        // plane.setLocalScale(initScalePlane);
+        // build terrain object
+        terr = new GameObject(GameObject.root(), terrS, grass);
+        initialTranslation = (new Matrix4f()).translation(0f, -6f, 0f);
+        terr.setLocalTranslation(initialTranslation);
+        initialScale = (new Matrix4f()).scaling(20.0f, 1.0f, 20.0f);
+        terr.setLocalScale(initialScale);
+        terr.setHeightMap(grassHM);
+
+        terr.getRenderStates().setTiling(10);
+        terr.getRenderStates().setTileFactor(5);
+
+        //------------------- setting up grid of tiles ----------
+        //build grid
+        grid = new Tile[gridWidth][gridHeight];
+
+        //center at world position 0,0,0 and start for loop at [0][0] on grid
+        //note: only works with even length width and heights for now 
+        float tempX = (-gridWidth / 2) * tileWidth; //starting X
+        float tempZ = (gridHeight / 2) * tileHeight; //starting Z
+
+        TileType placableTile = new TileType("placable", true);
+
+        for (int x = 0; x < gridWidth; x++) { //creating grid
+            tempZ = (gridHeight / 2) * tileHeight; //starting Z
+            for (int z = 0; z < gridHeight; z++) {
+                Vector3f tempPos = new Vector3f(tempX + (tileWidth / 2), 0f, tempZ - (tileHeight / 2));
+                Tile tempTile = new Tile(placableTile, tempPos);
+                grid[x][z] = tempTile;
+                tempZ -= tileHeight;
+            }
+            tempX += tileWidth;
+        }
+
+        //making test tables
+        testTables = new GameObject[gridWidth][gridHeight];
+        for (int x = 0; x < gridWidth; x++) {
+            for (int z = 0; z < gridHeight; z++) {
+                Matrix4f initTrans = (new Matrix4f()).translation(grid[x][z].getPosition().x, 0f, grid[x][z].getPosition().z);
+                GameObject table = new GameObject(GameObject.root(), tableS, brick);
+                table.setLocalTranslation(initTrans);
+                testTables[x][z] = table;
+            }
+        }
 
     }
 
@@ -208,6 +284,7 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void initializeGame() {
+        gm = new GhostManager(this);
         im = engine.getInputManager();
         setupNetworking();
 
@@ -218,15 +295,18 @@ public class MyGame extends VariableFrameRateGame {
         // ------------- positioning the camera -------------
         String gamepadName = (im.getFirstGamepadName());
 
-        orbitController = new CameraOrbitController(cam, dol, gamepadName, engine);
-        overheadController = new OverheadCameraController(overheadCam, gamepadName, engine);
+        // orbitController = new CameraOrbitController(cam, dol, gamepadName, engine);
+        overheadController = new OverheadCameraController(cam, gamepadName, engine);
 
         turnDirY = new float[2];
         turnDirX = new float[2];
-        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0f, 0f, 5f));
+        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0f, 20f, 0f));
+        // (engine.getRenderSystem().getViewport("MAIN").getCamera()).setU(new Vector3f(1f, 0f, 0f));
+        // (engine.getRenderSystem().getViewport("MAIN").getCamera()).setV(new Vector3f(0f, 1f, 0f));
+        // (engine.getRenderSystem().getViewport("MAIN").getCamera()).setN(new Vector3f(0f, 0f, -1f));
         (engine.getRenderSystem().getViewport("MAIN").getCamera()).setU(new Vector3f(1f, 0f, 0f));
-        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setV(new Vector3f(0f, 1f, 0f));
-        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setN(new Vector3f(0f, 0f, -1f));
+        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setV(new Vector3f(0f, 0f, -1f));
+        (engine.getRenderSystem().getViewport("MAIN").getCamera()).setN(new Vector3f(0f, -1f, 0f));
 
         // ---------------- input section ------------------
         // PhotoAction photoAction = new PhotoAction(this);
@@ -251,13 +331,12 @@ public class MyGame extends VariableFrameRateGame {
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-        //-----------------------------
     }
 
     private void setupNetworking() {
         isClientConnected = false;
         try {
-            protClient = new ProtocolClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
+            protClient = new ProtocolClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this, gm);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -289,10 +368,9 @@ public class MyGame extends VariableFrameRateGame {
         im.update((float) deltaTime);
 
         //-----------camera lock on dolphin------------
-        orbitController.updateCameraPosition();
+        // orbitController.updateCameraPosition();
         overheadController.updateCameraPosition();
         // System.out.println(cam.getLocation());
-
         //---------------------HUD-------------------------
         String dispStr3 = "";
 
@@ -314,6 +392,7 @@ public class MyGame extends VariableFrameRateGame {
         double HUD3Y = (screenBoundsY / 2);
         (engine.getHUDmanager()).setHUD3(dispStr3, hud2Color, (int) HUD3X, (int) HUD3Y);
 
+        processNetworking((float) currFrameTime);
         protClient.sendMoveMessage(new Vector3f(dolPos));
 
     }
@@ -324,16 +403,22 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
+    public ProtocolClient getProtClient() {
+        return protClient;
+    }
+
     public GameObject getAvatar() {
         return dol;
     }
 
     public ObjShape getGhostShape() {
-        return ghostS;
+        // return ghostS;
+        return dolS;
     }
 
     public TextureImage getGhostTexture() {
-        return ghostT;
+        // return ghostT;
+        return doltx;
     }
 
     public GhostManager getGhostManager() {

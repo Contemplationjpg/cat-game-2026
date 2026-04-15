@@ -16,16 +16,17 @@ public class ProtocolClient extends GameConnectionClient {
     private GhostManager ghostManager;
 
     public ProtocolClient(InetAddress remAddr, int remPort,
-            ProtocolType pType, MyGame game) throws IOException {
+            ProtocolType pType, MyGame g, GhostManager gm) throws IOException {
         super(remAddr, remPort, pType);
-        this.game = game;
+        this.game = g;
         this.id = UUID.randomUUID();
-        ghostManager = game.getGhostManager();
+        System.out.println("generated random UUID: " + id.toString());
+        ghostManager = gm;
     }
 
     @Override
     protected void processPacket(Object msg) {
-        System.out.println("RECEIVED PACKET: " + msg);
+        // System.out.println("RECEIVED PACKET: " + msg);
         String strMessage = (String) msg;
         String[] msgTokens = strMessage.split(",");
         if (msgTokens.length > 0) {
@@ -34,6 +35,8 @@ public class ProtocolClient extends GameConnectionClient {
                 if (msgTokens[1].compareTo("success") == 0) {
                     game.setIsConnected(true);
                     sendCreateMessage(game.getPlayerPosition());
+                    System.out.println("CONNECTED");
+
                 }
                 if (msgTokens[1].compareTo("failure") == 0) {
                     game.setIsConnected(false);
@@ -52,7 +55,13 @@ public class ProtocolClient extends GameConnectionClient {
                         Float.parseFloat(msgTokens[3]),
                         Float.parseFloat(msgTokens[4]));
                 try {
-                    ghostManager.createGhost(ghostID, ghostPosition);
+                    if (ghostManager == null) {
+                        System.out.println("ghost manager null");
+                    }
+                    else {
+                        ghostManager.createGhost(ghostID, ghostPosition);
+                        System.out.println("creating ghost avatar");
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.out.println("error creating ghost avatar");
@@ -63,6 +72,8 @@ public class ProtocolClient extends GameConnectionClient {
             }
             if (msgTokens[0].compareTo("move") == 0) // rec. "move..."
             {
+                // System.out.print("SUCCESSFULLY SENT SERVER POSITION: " + msgTokens[1] + ", " + msgTokens[2] + ", " + msgTokens[3]);
+                // System.out.println("SUCCESSFULLY SENT SERVER POSITION");
             }
         }
     }
@@ -78,6 +89,7 @@ public class ProtocolClient extends GameConnectionClient {
 
     public void sendCreateMessage(Vector3f pos) { // format: (create, localId, x,y,z)
         try {
+            System.out.println("SEND CREATE");
             String message = new String("create," + id.toString());
             message += "," + pos.x + "," + pos.y + "," + pos.z;
             sendPacket(message);
@@ -87,7 +99,11 @@ public class ProtocolClient extends GameConnectionClient {
     }
 
     public void sendByeMessage() {
-
+        try {
+            sendPacket(new String("bye," + id.toString()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendDetailsForMessage(UUID remId, Vector3f pos) {
@@ -96,7 +112,9 @@ public class ProtocolClient extends GameConnectionClient {
 
     public void sendMoveMessage(Vector3f pos) {
         try {
-            sendPacket(new String("move," + pos));
+            String message = new String("move," + id.toString());
+            message += "," + pos.x + "," + pos.y + "," + pos.z;
+            sendPacket(message);
         } catch (IOException e) {
             e.printStackTrace();
         }

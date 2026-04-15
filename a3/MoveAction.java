@@ -1,4 +1,5 @@
 package a3;
+
 import tage.*;
 import tage.input.action.AbstractInputAction;
 import net.java.games.input.Event;
@@ -7,8 +8,8 @@ import org.joml.Vector3f;
 
 import org.joml.*;
 
+public class MoveAction extends AbstractInputAction {
 
-public class MoveAction extends AbstractInputAction{
     private MyGame game;
     private GameObject av;
     private Vector3f oldPosition, newPosition;
@@ -16,7 +17,7 @@ public class MoveAction extends AbstractInputAction{
     private Boolean isController;
     private Boolean isForward;
     private float speed = 8f;
-    
+
     public MoveAction(MyGame g, Boolean c, Boolean f) {
         // System.out.println("initialized fwd action");
         game = g;
@@ -30,21 +31,19 @@ public class MoveAction extends AbstractInputAction{
         isController = c;
     }
 
-    @Override 
+    @Override
     public void performAction(float time, Event e) {
         float keyValue = e.getValue();
         // System.out.println(keyValue);
-        if (keyValue > -.2 && keyValue < .2){
+        if (keyValue > -.2 && keyValue < .2) {
             return;
         }
 
         if (isController) {
             move(time, -keyValue);
-        }
-        else if (isForward) {
+        } else if (isForward) {
             move(time, keyValue);
-        }
-        else {
+        } else {
             move(time, -keyValue);
         }
     }
@@ -54,10 +53,10 @@ public class MoveAction extends AbstractInputAction{
         oldPosition = av.getWorldLocation();
         fwdDirection = new Vector4f(0f, 0f, 1f, 1f);
         fwdDirection.mul(av.getWorldRotation());
-        fwdDirection.mul(speed*time*keyVal);
+        fwdDirection.mul(speed * time * keyVal);
         newPosition = oldPosition.add(fwdDirection.x(), 0, fwdDirection.z());
         av.setLocalLocation(newPosition);
+        game.getProtClient().sendMoveMessage(new Vector3f(newPosition));
     }
-
 
 }
