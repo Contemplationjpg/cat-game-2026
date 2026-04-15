@@ -146,7 +146,7 @@ public class OverheadCameraController {
 
         public void performAction(float time, Event event) {
             float movAmount = 0f;
-            System.out.println(event.getValue());
+            // System.out.println(event.getValue());
 
             if (isController) {
                 if (event.getValue() < -speed) {
