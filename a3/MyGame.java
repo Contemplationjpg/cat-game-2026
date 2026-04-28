@@ -160,9 +160,11 @@ public class MyGame extends VariableFrameRateGame {
         // (engine.getRenderSystem()).addViewport("OVERHEAD", 0.65f, 0.0f, 0.35f, 0.35f);
 
         camVp = (engine.getRenderSystem()).getViewport("MAIN");
-        // overheadVp = (engine.getRenderSystem()).getViewport("OVERHEAD");
         cam = (engine.getRenderSystem().getViewport("MAIN").getCamera());
+//USE FOR overhead cam
+        // overheadVp = (engine.getRenderSystem()).getViewport("OVERHEAD");
         // overheadCam = (engine.getRenderSystem().getViewport("OVERHEAD").getCamera());
+//--------------------
 
         // overheadVp.setHasBorder(true);
         // overheadVp.setBorderWidth(3);
@@ -221,15 +223,13 @@ public class MyGame extends VariableFrameRateGame {
         // plane.setLocalScale(initScalePlane);
         // build terrain object
         terr = new GameObject(GameObject.root(), terrS, grass);
-        initialTranslation = (new Matrix4f()).translation(0f, -6f, 0f);
+        initialTranslation = (new Matrix4f()).translation(0f, 1f, 0f);
         terr.setLocalTranslation(initialTranslation);
-        initialScale = (new Matrix4f()).scaling(20.0f, 1.0f, 20.0f);
+        initialScale = (new Matrix4f()).scaling(50.0f, 1.0f, 50.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(grassHM);
-
         terr.getRenderStates().setTiling(10);
-        terr.getRenderStates().setTileFactor(5);
-
+        terr.getRenderStates().setTileFactor(1);
         //------------------- setting up grid of tiles ----------
         //build grid
         grid = new Tile[gridWidth][gridHeight];
@@ -259,6 +259,7 @@ public class MyGame extends VariableFrameRateGame {
                 Matrix4f initTrans = (new Matrix4f()).translation(grid[x][z].getPosition().x, 0f, grid[x][z].getPosition().z);
                 GameObject table = new GameObject(GameObject.root(), tableS, brick);
                 table.setLocalTranslation(initTrans);
+
                 testTables[x][z] = table;
             }
         }
@@ -295,8 +296,8 @@ public class MyGame extends VariableFrameRateGame {
         // ------------- positioning the camera -------------
         String gamepadName = (im.getFirstGamepadName());
 
-        // orbitController = new CameraOrbitController(cam, dol, gamepadName, engine);
-        overheadController = new OverheadCameraController(cam, gamepadName, engine);
+        // orbitController = new CameraOrbitController(cam, dol, gamepadName, engine); //FOR ORBIT CONTROLLER
+        overheadController = new OverheadCameraController(cam, gamepadName, engine); //FOR OVERHEAD CONTROLLER
 
         turnDirY = new float[2];
         turnDirX = new float[2];
@@ -309,8 +310,6 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getRenderSystem().getViewport("MAIN").getCamera()).setN(new Vector3f(0f, -1f, 0f));
 
         // ---------------- input section ------------------
-        // PhotoAction photoAction = new PhotoAction(this);
-        // XYZAction xyzAction = new XYZAction(this);
         MoveAction moveActionPad = new MoveAction(this, true);
         MoveAction moveActionKeyF = new MoveAction(this, false, true);
         MoveAction moveActionKeyB = new MoveAction(this, false, false);
@@ -319,10 +318,6 @@ public class MyGame extends VariableFrameRateGame {
         TurnAction turnActionKeyR = new TurnAction(this, false, true);
         TurnAction turnActionKeyL = new TurnAction(this, false, false);
 
-        // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Button._2, photoAction, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-        // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.SPACE, photoAction, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-        // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Button._9, xyzAction, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-        // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key._2, xyzAction, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
         im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, moveActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, moveActionKeyF, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, moveActionKeyB, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -368,8 +363,8 @@ public class MyGame extends VariableFrameRateGame {
         im.update((float) deltaTime);
 
         //-----------camera lock on dolphin------------
-        // orbitController.updateCameraPosition();
-        overheadController.updateCameraPosition();
+        // orbitController.updateCameraPosition(); //FOR ORBIT CONTROLLER
+        overheadController.updateCameraPosition(); //FOR OVERHEAD CONTROLLER
         // System.out.println(cam.getLocation());
         //---------------------HUD-------------------------
         String dispStr3 = "";
