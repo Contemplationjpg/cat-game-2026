@@ -43,6 +43,8 @@ public class MyGame extends VariableFrameRateGame {
     private int counter = 0;
     private double lastFrameTime, currFrameTime, deltaTime;
 
+    private boolean isOrbitMode = false;
+
     private CameraOrbitController orbitController;
     private OverheadCameraController overheadController;
 
@@ -80,9 +82,13 @@ public class MyGame extends VariableFrameRateGame {
     private ObjShape tableS;
     private GameObject testTables[][];
 
+    private GameObject cursor;
+    private ObjShape cursorS;
+
     private Light lightP1, lightP2, lightP3, lightH;
 
     private InputManager im;
+    private CursorManager cm;
 
     private float[] turnDirY; //Y axis turn is left and right
     private final float turnSpeedY = 0.08f;
@@ -225,11 +231,16 @@ public class MyGame extends VariableFrameRateGame {
         terr = new GameObject(GameObject.root(), terrS, grass);
         initialTranslation = (new Matrix4f()).translation(0f, 1f, 0f);
         terr.setLocalTranslation(initialTranslation);
-        initialScale = (new Matrix4f()).scaling(50.0f, 1.0f, 50.0f);
+        initialScale = (new Matrix4f()).scaling(50.0f, -4.0f, 50.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(grassHM);
         terr.getRenderStates().setTiling(10);
         terr.getRenderStates().setTileFactor(1);
+
+        cursor = new GameObject(GameObject.root(), tableS, gas);
+        initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
+        cursor.setLocalTranslation(initialTranslation);
+
         //------------------- setting up grid of tiles ----------
         //build grid
         grid = new Tile[gridWidth][gridHeight];
@@ -287,6 +298,7 @@ public class MyGame extends VariableFrameRateGame {
     public void initializeGame() {
         gm = new GhostManager(this);
         im = engine.getInputManager();
+        cm = new CursorManager(this);
         setupNetworking();
 
         lastFrameTime = System.currentTimeMillis();
@@ -310,22 +322,28 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getRenderSystem().getViewport("MAIN").getCamera()).setN(new Vector3f(0f, -1f, 0f));
 
         // ---------------- input section ------------------
-        MoveAction moveActionPad = new MoveAction(this, true);
-        MoveAction moveActionKeyF = new MoveAction(this, false, true);
-        MoveAction moveActionKeyB = new MoveAction(this, false, false);
+        CursorMoveActionVert moveCursorActionVertPad = new CursorMoveActionVert(this, true);
+        CursorMoveActionVert moveCursorActionVertKeyF = new CursorMoveActionVert(this, false, true);
+        CursorMoveActionVert moveCursorActionVertKeyB = new CursorMoveActionVert(this, false, false);
 
-        TurnAction turnActionPad = new TurnAction(this, true);
-        TurnAction turnActionKeyR = new TurnAction(this, false, true);
-        TurnAction turnActionKeyL = new TurnAction(this, false, false);
+        CursorMoveActionHori moveCursorActionHoriPad = new CursorMoveActionHori(this, true);
+        CursorMoveActionHori moveCursorActionHoriKeyF = new CursorMoveActionHori(this, false, true);
+        CursorMoveActionHori moveCursorActionHoriKeyB = new CursorMoveActionHori(this, false, false);
 
-        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, moveActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, moveActionKeyF, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, moveActionKeyB, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        // TurnAction turnActionPad = new TurnAction(this, true);
+        // TurnAction turnActionKeyR = new TurnAction(this, false, true);
+        // TurnAction turnActionKeyL = new TurnAction(this, false, false);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, moveCursorActionVertPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.W, moveCursorActionVertKeyF, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.S, moveCursorActionVertKeyB, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
-        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, turnActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, moveCursorActionHoriPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, moveCursorActionHoriKeyF, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+        im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, moveCursorActionHoriKeyB, InputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
+        // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, turnActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+        // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
     }
 
     private void setupNetworking() {
@@ -357,6 +375,8 @@ public class MyGame extends VariableFrameRateGame {
         } else {
             deltaTime = 0.0f;
         }
+
+        cm.updateCursor();
 
         // System.out.println(deltaTime);
         //-----------------update inputs-------------
@@ -402,17 +422,43 @@ public class MyGame extends VariableFrameRateGame {
         return protClient;
     }
 
+    public Tile[][] getGrid() {
+        return grid;
+    }
+
+    public int getGridWidth() {
+        return gridWidth;
+    }
+
+    public int getGridHeight() {
+        return gridHeight;
+    }
+
+    public float getTileWidth() {
+        return tileWidth;
+    }
+
+    public float getTileHeight() {
+        return tileHeight;
+    }
+
+    public GameObject getCursorObj() {
+        return cursor;
+    }
+
+    public CursorManager getCursorManager() {
+        return cm;
+    }
+
     public GameObject getAvatar() {
         return dol;
     }
 
-    public ObjShape getGhostShape() {
-        // return ghostS;
+    public ObjShape getGhostShape() {// return ghostS;
         return dolS;
     }
 
-    public TextureImage getGhostTexture() {
-        // return ghostT;
+    public TextureImage getGhostTexture() {// return ghostT;
         return doltx;
     }
 
@@ -430,6 +476,10 @@ public class MyGame extends VariableFrameRateGame {
 
     public void setIsConnected(boolean isConnected) {
         isClientConnected = isConnected;
+    }
+
+    public boolean getIsOrbitMode() {
+        return isOrbitMode;
     }
 
     public Engine getEngine() {
