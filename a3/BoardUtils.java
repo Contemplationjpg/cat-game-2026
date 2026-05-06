@@ -37,20 +37,34 @@ public class BoardUtils {
         int x = 0; //current x
         int z = 0; //current z
         while (x < gridWidth) {
-            System.out.println(x + ", " + z);
+            // System.out.println(x + ", " + z);
             if (grid[x][z].getTileType().getIsTrail()) {
+                System.out.println(x + ", " + z);
                 Vector2i tempCoord = new Vector2i(x, z);
                 out.add(tempCoord);
 
-                if (x + 1 > gridWidth) {
+                if (x + 1 >= gridWidth) { //if at the far right, end
+                    break;
+                } else if (grid[x + 1][z].getTileType().getIsTrail()) { //if right is valid, move right
                     x += 1;
-                } else if (grid[x + 1][z].getTileType().getIsTrail()) {
-                    x += 1;
-                } else if (z + 1 < gridHeight) {
-                    if (grid[x][z + 1].getTileType().getIsTrail()) {
-                        z += 1;
-                    } else {
-                        return out;
+                    continue;
+                }
+                if (z - 1 >= 0) { //if above is within range
+                    if (grid[x][z - 1].getTileType().getIsTrail()) { //and above is valid
+                        if (!out.get(out.size() - 2).equals(new Vector2i(x, z - 1))) { //and above is not the same as the last thing entered, move up
+                            z -= 1;
+                            continue;
+                        }
+                    }
+                    if (z + 1 < gridHeight) { //if below is within range
+                        if (grid[x][z + 1].getTileType().getIsTrail()) { //and below is valid
+                            if (!out.get(out.size() - 2).equals(new Vector2i(x, z + 1))) { //and below is not the same as last, move down
+                                z += 1;
+                                continue;
+                            }
+                        } else {
+                            return out;
+                        }
                     }
                 }
 

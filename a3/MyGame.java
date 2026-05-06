@@ -90,6 +90,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private InputManager im;
     private CursorManager cm;
+    private EnemyManager em;
 
     private float[] turnDirY; //Y axis turn is left and right
     private final float turnSpeedY = 0.08f;
@@ -331,6 +332,7 @@ public class MyGame extends VariableFrameRateGame {
         gm = new GhostManager(this);
         im = engine.getInputManager();
         cm = new CursorManager(this);
+        em = new EnemyManager(this);
         setupNetworking();
 
         lastFrameTime = System.currentTimeMillis();
@@ -409,6 +411,7 @@ public class MyGame extends VariableFrameRateGame {
         }
 
         cm.updateCursor();
+        em.updateAllEnemies(deltaTime);
 
         // System.out.println(deltaTime);
         //-----------------update inputs-------------
@@ -459,6 +462,10 @@ public class MyGame extends VariableFrameRateGame {
 
     public Tile[][] getGrid() {
         return grid;
+    }
+
+    public ArrayList<Vector2i> getPath() {
+        return path;
     }
 
     public int getGridWidth() {
@@ -559,8 +566,16 @@ public class MyGame extends VariableFrameRateGame {
             case KeyEvent.VK_0:
                 isOrbitMode = !isOrbitMode;
                 break;
+            case KeyEvent.VK_2:
+                spawnEnemy();
+                break;
         }
         super.keyPressed(e);
+    }
+
+    private void spawnEnemy() {
+        Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, 3.0f);
+        em.addEnemy(testEnemy);
     }
 
 }
