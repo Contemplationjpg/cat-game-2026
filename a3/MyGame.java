@@ -121,6 +121,7 @@ public class MyGame extends VariableFrameRateGame {
     private final int gridHeight = 6;
     private final float tileWidth = 10.0f;
     private final float tileHeight = 10.0f;
+    private ArrayList<Vector2i> path;
 
     private int mountainsBox; //skybox
 
@@ -218,8 +219,9 @@ public class MyGame extends VariableFrameRateGame {
         Matrix4f initialTranslation, initialScale;
 
         // build dolphin in the center of the window
-        dol = new GameObject(GameObject.root(), dolS, doltx);
-        initialTranslation = (new Matrix4f()).translation(0, 2, 0);
+        // dol = new GameObject(GameObject.root(), dolS, doltx);
+        dol = new GameObject(GameObject.root(), dolS, null);
+        initialTranslation = (new Matrix4f()).translation(0, -15, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
@@ -261,7 +263,7 @@ public class MyGame extends VariableFrameRateGame {
         float tempZ = (-gridHeight / 2) * tileHeight; //starting Z
 
         TileType placableTile = new TileType("placable", true);
-        TileType trailTile = new TileType("trail", false);
+        TileType trailTile = new TileType("trail", false, true);
 
         for (int x = 0; x < gridWidth; x++) { //creating grid
             tempZ = (-gridHeight / 2) * tileHeight; //starting Z
@@ -284,6 +286,10 @@ public class MyGame extends VariableFrameRateGame {
             }
             tempX += tileWidth;
         }
+
+        //build path
+        path = BoardUtils.pathDrawer(this);
+        System.out.print(path.toString());
 
         //making test tables
         testTables = new GameObject[gridWidth][gridHeight];
