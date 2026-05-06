@@ -33,6 +33,9 @@ public class CursorMoveActionHori extends AbstractInputAction {
 
     @Override
     public void performAction(float time, Event e) {
+        if (game.getIsOrbitMode()) {
+            return;
+        }
         float keyValue = e.getValue();
         // System.out.println(keyValue);
         if (keyValue > -.2 && keyValue < .2) {
