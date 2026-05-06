@@ -25,6 +25,7 @@ import java.lang.Math;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import java.util.Vector;
 import java.util.Arrays;
 import javax.net.ssl.X509TrustManager;
@@ -242,23 +243,44 @@ public class MyGame extends VariableFrameRateGame {
         cursor.setLocalTranslation(initialTranslation);
 
         //------------------- setting up grid of tiles ----------
+        //read board
+        ArrayList<ArrayList<String>> board = null;
+        try {
+            board = BoardUtils.parseBoard("a3/board.txt");
+            System.out.println(board); //testing board
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+
         //build grid
         grid = new Tile[gridWidth][gridHeight];
 
         //center at world position 0,0,0 and start for loop at [0][0] on grid
         //note: only works with even length width and heights for now 
         float tempX = (-gridWidth / 2) * tileWidth; //starting X
-        float tempZ = (gridHeight / 2) * tileHeight; //starting Z
+        float tempZ = (-gridHeight / 2) * tileHeight; //starting Z
 
         TileType placableTile = new TileType("placable", true);
+        TileType trailTile = new TileType("trail", false);
 
         for (int x = 0; x < gridWidth; x++) { //creating grid
-            tempZ = (gridHeight / 2) * tileHeight; //starting Z
+            tempZ = (-gridHeight / 2) * tileHeight; //starting Z
             for (int z = 0; z < gridHeight; z++) {
-                Vector3f tempPos = new Vector3f(tempX + (tileWidth / 2), 0f, tempZ - (tileHeight / 2));
+                Vector3f tempPos = new Vector3f(tempX + (tileWidth / 2), 0f, tempZ + (tileHeight / 2));
                 Tile tempTile = new Tile(placableTile, tempPos);
+                if (board != null) {
+                    try {
+                        if (board.get(z).get(x).equals("p")) {
+                            tempTile = new Tile(placableTile, tempPos);
+                        } else if (board.get(z).get(x).equals("t")) {
+                            tempTile = new Tile(trailTile, tempPos);
+                        }
+                    } catch (Exception e) {
+                        System.err.println(e);
+                    }
+                }
                 grid[x][z] = tempTile;
-                tempZ -= tileHeight;
+                tempZ += tileHeight;
             }
             tempX += tileWidth;
         }
@@ -269,6 +291,9 @@ public class MyGame extends VariableFrameRateGame {
             for (int z = 0; z < gridHeight; z++) {
                 Matrix4f initTrans = (new Matrix4f()).translation(grid[x][z].getPosition().x, 0f, grid[x][z].getPosition().z);
                 GameObject table = new GameObject(GameObject.root(), tableS, brick);
+                if (!grid[x][z].getTileType().getTowerable()) {
+                    table.setTextureImage(purplebrick);
+                }
                 table.setLocalTranslation(initTrans);
                 // grid[x][z].setTower((Tower) table);
 

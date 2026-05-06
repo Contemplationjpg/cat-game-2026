@@ -25,12 +25,12 @@ public class CursorManager {
     }
 
     public void moveCursorVert(float dir) {
-        if (dir > 0) {
+        if (dir < 0) {
             if (cursorPos[1] + 1 < gridHeight) {
                 cursorPos[1] += 1;
             }
         }
-        if (dir < 0) {
+        if (dir > 0) {
             if (cursorPos[1] - 1 >= 0) {
                 cursorPos[1] -= 1;
             }
@@ -63,6 +63,7 @@ public class CursorManager {
         float newZ = pos.z - (game.getGridHeight() / 3f);
         Matrix4f transform = (new Matrix4f()).translation(newX, 3f, newZ);
         cursor.setLocalTranslation(transform);
+        // System.out.println(cursor.getWorldLocation())
     }
 
 }
