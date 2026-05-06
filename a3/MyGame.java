@@ -572,17 +572,18 @@ public class MyGame extends VariableFrameRateGame {
                 isOrbitMode = !isOrbitMode;
                 break;
             case KeyEvent.VK_2:
-                spawnEnemy();
+                spawnEnemy(2.0f);
+                break;
+            case KeyEvent.VK_3:
+                spawnEnemy(5.0f);
                 break;
         }
         super.keyPressed(e);
     }
 
-    private void spawnEnemy() {
-        Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, 3.0f);
+    private void spawnEnemy(float sp) {
+        Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, sp);
         em.addEnemy(testEnemy);
     }
 
-
-    
 }
