@@ -47,14 +47,11 @@ public class Enemy extends GameObject {
         // Vector3f direction = goalPos.sub(oldPos).normalize().mul(speed * (float) deltaTime);
         // oldPos.lerp(goalPos, speed * (float) deltaTime);
         setLocalLocation(oldPos.lerp(goalPos, speed * (float) deltaTime));
+        lookAt(goalPos);
         // setLocalLocation(oldPos.add(direction.x(), direction.y(), direction.z()));
         if (detectDistance(oldPos, goalPos) < 1f) {
             nextTileOnPath += 1;
         }
-    }
-
-    private void destroyEnemy() {
-
     }
 
     public boolean getIsAtEndOfPath() {

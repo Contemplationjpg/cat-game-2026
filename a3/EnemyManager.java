@@ -19,7 +19,7 @@ public class EnemyManager {
             return;
         }
         for (int i = 0; i < enemies.size(); i++) {
-            System.out.println("updating enemy " + i);
+            // System.out.println("updating enemy " + i);
             enemies.get(i).updateEnemyAI(deltaTime);
             if (enemies.get(i).getIsAtEndOfPath()) {
                 destroyEnemyEnd(i);
