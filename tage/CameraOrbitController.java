@@ -1,6 +1,7 @@
 // Made by M. Saechao
 package tage;
 
+import a3.MyGame;
 import tage.input.*;
 import org.joml.*;
 import org.joml.Vector3f;
@@ -20,26 +21,35 @@ public class CameraOrbitController {
 
     private Engine engine;
     private Camera camera;
+    private MyGame game;
     private GameObject avatar;
     private float cameraAzimuth;
     private float cameraElevation;
     private float cameraRadius;
     private float speed;
+    private int[] currentTile;
 
-    /**Creates CameraOrbitController that controls a camera and orbits it around a specified GameObject, its rotation independent from the GameObject */
-    public CameraOrbitController(Camera cam, GameObject av, String gamepadName, Engine e) {
+    /**
+     * Creates CameraOrbitController that controls a camera and orbits it around
+     * a specified GameObject, its rotation independent from the GameObject
+     */
+    public CameraOrbitController(Camera cam, MyGame g, String gamepadName, Engine e) {
         engine = e;
         camera = cam;
-        avatar = av;
+        game = g;
+        avatar = game.getAvatar();
+        // avatar = av;
         cameraAzimuth = 0.0f;
         cameraElevation = 20.0f;
         cameraRadius = 2.0f;
-        speed = 1f;
+        speed = 2f;
         setupInputs(gamepadName);
         updateCameraPosition();
     }
 
-    /** Sets up keyboard and gamepad inputs for the camera controller */
+    /**
+     * Sets up keyboard and gamepad inputs for the camera controller
+     */
     private void setupInputs(String gamepadName) {
         InputManager im = engine.getInputManager();
 
@@ -88,13 +98,19 @@ public class CameraOrbitController {
 
     }
 
-    /**Updates Camera Position based on current azimuth, elevation, and radius values. Also limits camera elevation and radius. */
+    /**
+     * Updates Camera Position based on current azimuth, elevation, and radius
+     * values. Also limits camera elevation and radius.
+     */
     public void updateCameraPosition() {
+        currentTile = game.getCursorManager().getCursorPos();
+
+        Vector3f tileLoc = game.getGrid()[currentTile[0]][currentTile[1]].getPosition();
+
 //code to match relative position to dolphin rotation------------
         // Vector3f avatarRot = avatar.getWorldForwardVector();
         // double avatarAngle = Math.toDegrees((double) avatarRot.angleSigned(new Vector3f(0, 0, -1), new Vector3f(0, 1, 0)));
         // float totalAz = cameraAzimuth - (float) avatarAngle;
-
 //------------------cleaning camera azimuth, elevation, and radius---------------------------
         cameraAzimuth = cameraAzimuth % 360; //azimuth loops
 
@@ -118,16 +134,19 @@ public class CameraOrbitController {
         float y = cameraRadius * (float) (Math.sin(phi));
         float z = cameraRadius * (float) (Math.cos(phi) * Math.cos(theta));
 
-        Vector3f newLoc = new Vector3f(x, y, z).add(avatar.getWorldLocation());
+        // Vector3f newLoc = new Vector3f(x, y, z).add(avatar.getWorldLocation());
+        Vector3f newLoc = new Vector3f(x, y, z).add(tileLoc);
 
         if (newLoc.y() < 1) {
             newLoc = new Vector3f(newLoc.x, 1, newLoc.z);
-            camera.lookAt(avatar);
+            // camera.lookAt(avatar);
+            camera.lookAt(tileLoc);
             // return;
         }
 
         camera.setLocation(newLoc);
-        camera.lookAt(avatar);
+        // camera.lookAt(avatar);
+        camera.lookAt(tileLoc);
     }
 
     private class OrbitAzimuthAction extends AbstractInputAction {
@@ -135,7 +154,10 @@ public class CameraOrbitController {
         private Boolean isController = false;
         private Boolean isForward = false;
 
-        /**Sets isController and isForward to specified values to enable reuability for both digital and analog inputs */
+        /**
+         * Sets isController and isForward to specified values to enable
+         * reuability for both digital and analog inputs
+         */
         public void setUp(Boolean c, Boolean f) {
             isController = c;
             isForward = f;
@@ -172,7 +194,10 @@ public class CameraOrbitController {
         private Boolean isController = false;
         private Boolean isForward = false;
 
-        /**Sets isController and isForward to specified values to enable reuability for both digital and analog inputs */
+        /**
+         * Sets isController and isForward to specified values to enable
+         * reuability for both digital and analog inputs
+         */
         public void setUp(Boolean c, Boolean f) {
             isController = c;
             isForward = f;
@@ -210,7 +235,10 @@ public class CameraOrbitController {
         private Boolean isController = false;
         private Boolean isForward = false;
 
-        /**Sets isController and isForward to specified values to enable reuability for both digital and analog inputs */
+        /**
+         * Sets isController and isForward to specified values to enable
+         * reuability for both digital and analog inputs
+         */
         public void setUp(Boolean c, Boolean f) {
             isController = c;
             isForward = f;

@@ -28,12 +28,12 @@ public class OverheadCameraController {
     public OverheadCameraController(Camera cam, String gamepadName, Engine e) {
         engine = e;
         camera = cam;
-        cameraElevation = 20.0f;
+        cameraElevation = 55.0f;
         cameraX = 0.0f;
         cameraZ = 0.0f;
         speed = 1f;
-        setupInputs(gamepadName);
-        updateCameraPosition();
+        // setupInputs(gamepadName);
+        // updateCameraPosition();
     }
 
     private void setupInputs(String gamepadName) {
@@ -79,7 +79,15 @@ public class OverheadCameraController {
 
     }
 
+    private void pointCameraDown() {
+        // camera.setLocation(new Vector3f(0f, 20f, 0f));
+        camera.setU(new Vector3f(1f, 0f, 0f));
+        camera.setV(new Vector3f(0f, 0f, -1f));
+        camera.setN(new Vector3f(0f, -1f, 0f));
+    }
+
     public void updateCameraPosition() {
+        pointCameraDown();
         if (cameraElevation >= 100) { //camera elevation locked between 10 to 100
             cameraElevation = 100;
         } else if (cameraElevation <= 10) {

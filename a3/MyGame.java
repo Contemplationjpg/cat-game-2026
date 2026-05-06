@@ -229,9 +229,9 @@ public class MyGame extends VariableFrameRateGame {
         // plane.setLocalScale(initScalePlane);
         // build terrain object
         terr = new GameObject(GameObject.root(), terrS, grass);
-        initialTranslation = (new Matrix4f()).translation(0f, 1f, 0f);
+        initialTranslation = (new Matrix4f()).translation(0f, -4f, 0f);
         terr.setLocalTranslation(initialTranslation);
-        initialScale = (new Matrix4f()).scaling(50.0f, -4.0f, 50.0f);
+        initialScale = (new Matrix4f()).scaling(50.0f, 1.0f, 50.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(grassHM);
         terr.getRenderStates().setTiling(10);
@@ -270,6 +270,7 @@ public class MyGame extends VariableFrameRateGame {
                 Matrix4f initTrans = (new Matrix4f()).translation(grid[x][z].getPosition().x, 0f, grid[x][z].getPosition().z);
                 GameObject table = new GameObject(GameObject.root(), tableS, brick);
                 table.setLocalTranslation(initTrans);
+                // grid[x][z].setTower((Tower) table);
 
                 testTables[x][z] = table;
             }
@@ -308,7 +309,7 @@ public class MyGame extends VariableFrameRateGame {
         // ------------- positioning the camera -------------
         String gamepadName = (im.getFirstGamepadName());
 
-        // orbitController = new CameraOrbitController(cam, dol, gamepadName, engine); //FOR ORBIT CONTROLLER
+        orbitController = new CameraOrbitController(cam, this, gamepadName, engine); //FOR ORBIT CONTROLLER
         overheadController = new OverheadCameraController(cam, gamepadName, engine); //FOR OVERHEAD CONTROLLER
 
         turnDirY = new float[2];
@@ -383,8 +384,11 @@ public class MyGame extends VariableFrameRateGame {
         im.update((float) deltaTime);
 
         //-----------camera lock on dolphin------------
-        // orbitController.updateCameraPosition(); //FOR ORBIT CONTROLLER
-        overheadController.updateCameraPosition(); //FOR OVERHEAD CONTROLLER
+        if (isOrbitMode) {
+            orbitController.updateCameraPosition(); //FOR ORBIT CONTROLLER
+        } else {
+            overheadController.updateCameraPosition(); //FOR OVERHEAD CONTROLLER
+        }
         // System.out.println(cam.getLocation());
         //---------------------HUD-------------------------
         String dispStr3 = "";
@@ -520,6 +524,10 @@ public class MyGame extends VariableFrameRateGame {
                 if (protClient != null && isClientConnected == true) {
                     protClient.sendByeMessage();
                 }
+                break;
+            case KeyEvent.VK_0:
+                isOrbitMode = !isOrbitMode;
+                break;
         }
         super.keyPressed(e);
     }
