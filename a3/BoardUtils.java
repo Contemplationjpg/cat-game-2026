@@ -39,7 +39,7 @@ public class BoardUtils {
         while (x < gridWidth) {
             // System.out.println(x + ", " + z);
             if (grid[x][z].getTileType().getIsTrail()) {
-                System.out.println(x + ", " + z);
+                // System.out.println(x + ", " + z);
                 Vector2i tempCoord = new Vector2i(x, z);
                 out.add(tempCoord);
 
@@ -55,7 +55,7 @@ public class BoardUtils {
                             z -= 1;
                             continue;
                         }
-                    }
+                    } 
                     if (z + 1 < gridHeight) { //if below is within range
                         if (grid[x][z + 1].getTileType().getIsTrail()) { //and below is valid
                             if (!out.get(out.size() - 2).equals(new Vector2i(x, z + 1))) { //and below is not the same as last, move down

@@ -250,7 +250,7 @@ public class MyGame extends VariableFrameRateGame {
         ArrayList<ArrayList<String>> board = null;
         try {
             board = BoardUtils.parseBoard("a3/board.txt");
-            System.out.println(board); //testing board
+            // System.out.println(board); //testing board
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -293,7 +293,7 @@ public class MyGame extends VariableFrameRateGame {
 
         //build path
         path = BoardUtils.pathDrawer(this);
-        System.out.print(path.toString());
+        // System.out.print(path.toString());
 
         //making test tables
         testTables = new GameObject[gridWidth][gridHeight];
@@ -583,4 +583,6 @@ public class MyGame extends VariableFrameRateGame {
         em.addEnemy(testEnemy);
     }
 
+
+    
 }
