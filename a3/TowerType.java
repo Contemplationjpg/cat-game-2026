@@ -86,6 +86,10 @@ public class TowerType {
         }
     }
 
+    public void towerAI(Tower t, double deltaTime) {
+        return;
+    }
+
     public void setName(String n) {
         name = n;
     }

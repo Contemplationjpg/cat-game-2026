@@ -14,4 +14,8 @@ public class Tower extends GameObject {
         towerType = tT;
     }
 
+    public void updateTowerAI(double deltaTime) {
+        towerType.towerAI(this, deltaTime);
+    }
+
 }
