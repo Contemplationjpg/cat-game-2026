@@ -265,6 +265,7 @@ public class MyGame extends VariableFrameRateGame {
 
         TileType placableTile = new TileType("placable", true);
         TileType trailTile = new TileType("trail", false, true);
+        TileType unplacableTile = new TileType("unplacable", false);
 
         for (int x = 0; x < gridWidth; x++) { //creating grid
             tempZ = (-gridHeight / 2) * tileHeight; //starting Z
@@ -277,6 +278,8 @@ public class MyGame extends VariableFrameRateGame {
                             tempTile = new Tile(placableTile, tempPos);
                         } else if (board.get(z).get(x).equals("t")) {
                             tempTile = new Tile(trailTile, tempPos);
+                        } else if (board.get(z).get(x).equals("u")) {
+                            tempTile = new Tile(unplacableTile, tempPos);
                         }
                     } catch (Exception e) {
                         System.err.println(e);
@@ -298,8 +301,10 @@ public class MyGame extends VariableFrameRateGame {
             for (int z = 0; z < gridHeight; z++) {
                 Matrix4f initTrans = (new Matrix4f()).translation(grid[x][z].getPosition().x, 0f, grid[x][z].getPosition().z);
                 GameObject table = new GameObject(GameObject.root(), tableS, brick);
-                if (!grid[x][z].getTileType().getTowerable()) {
+                if ((grid[x][z].getTileType().getName()).equals("trail")) {
                     table.setTextureImage(purplebrick);
+                } else if (grid[x][z].getTileType().getName().equals("unplacable")) {
+                    table.setShape(dolS);
                 }
                 table.setLocalTranslation(initTrans);
                 // grid[x][z].setTower((Tower) table);
