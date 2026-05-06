@@ -63,7 +63,7 @@ public class CursorManager {
         float newZ = pos.z - (game.getGridHeight() / 3f);
         Matrix4f transform = (new Matrix4f()).translation(newX, 3f, newZ);
         cursor.setLocalTranslation(transform);
-        // System.out.println(cursor.getWorldLocation())
+        // System.out.println(cursorPos[0] + ", " + cursorPos[1]);
     }
 
 }
