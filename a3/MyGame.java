@@ -226,6 +226,8 @@ public class MyGame extends VariableFrameRateGame {
 
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
 
+        cursorS = new ImportedModel("cursor.obj");
+
     }
 
     @Override
@@ -274,7 +276,7 @@ public class MyGame extends VariableFrameRateGame {
         terr.getRenderStates().setTiling(10);
         terr.getRenderStates().setTileFactor(1);
 
-        cursor = new GameObject(GameObject.root(), tableS, gas);
+        cursor = new GameObject(GameObject.root(), cursorS, gas);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
         cursor.setLocalTranslation(initialTranslation);
 
