@@ -51,7 +51,7 @@ public class Tile {
 
     public void removeTower() {
         if (tower != null) {
-            PhysicsObject rock = (game.getTowerManager()).getRocks().get((game.getTowerManager().getTowers()).indexOf(tower));
+            PhysicsObject rock = tower.getTowerType().getProjectileP();
             (game.getTowerManager()).removeRock(rock);
             (game.getTowerManager()).removeTower(tower);
             game.getEngine().getSceneGraph().removeGameObject(tower);

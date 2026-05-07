@@ -1,7 +1,7 @@
 package a3;
 
-import tage.ObjShape;
-import tage.TextureImage;
+import tage.*;
+import tage.physics.*;
 import tage.shapes.ImportedModel;
 
 public class TowerType {
@@ -9,6 +9,8 @@ public class TowerType {
     private String name;
     private ObjShape model;
     private TextureImage texture;
+    private GameObject projectile = null;
+    private PhysicsObject projectileP = null;
 
     public TowerType(String n) {
         name = n;
@@ -114,4 +116,7 @@ public class TowerType {
         return texture;
     }
 
+    public PhysicsObject getProjectileP() {
+        return projectileP;
+    }
 }

@@ -1,6 +1,7 @@
 package a3;
 
 import tage.*;
+import tage.audio.*;
 import org.joml.*;
 import java.util.*;
 import tage.physics.*;
@@ -15,6 +16,8 @@ public class EnemyManager {
 
     private ArrayList<Enemy> enemies = new ArrayList<Enemy>();
     private ArrayList<PhysicsObject> enemyPs = new ArrayList<PhysicsObject>();
+    private ArrayList<Sound> deathSounds = new ArrayList<Sound>();
+
 
     public void updateAllEnemies(double deltaTime) {
         if (enemies.isEmpty()) {
@@ -31,7 +34,6 @@ public class EnemyManager {
                         // System.out.println("Health: " + enemies.get(i).getHealth());
                     }
                 }
-
             }
             enemies.get(i).updateEnemyAI(deltaTime);
             Vector3f loc = enemies.get(i).getWorldLocation();
@@ -54,6 +56,9 @@ public class EnemyManager {
         game.getEngine().getSceneGraph().removePhysicsObject(enemyPs.get(i));
         enemyPs.set(i, null);
         enemyPs.remove(i);
+        deathSounds.get(i).play();
+        deathSounds.set(i,null); //memory leak here maybe??
+        deathSounds.remove(i);
         System.out.println("Enemy health reduced to zero.");
     }
 
@@ -64,6 +69,8 @@ public class EnemyManager {
         game.getEngine().getSceneGraph().removePhysicsObject(enemyPs.get(i));
         enemyPs.set(i, null);
         enemyPs.remove(i);
+        deathSounds.set(i,null); //there might be a memory leak here?? Java data collection hopefully gets to it
+        deathSounds.remove(i);
         System.out.println("Enemy made it to end!");
     }
 
@@ -87,5 +94,13 @@ public class EnemyManager {
 
     public ArrayList<PhysicsObject> getEnemyPs() {
         return enemyPs;
+    }
+
+    public void addDeathSound(Sound s) {
+        deathSounds.add(s);
+    }
+
+    public ArrayList<Sound> getDeathSounds() {
+        return deathSounds;
     }
 }

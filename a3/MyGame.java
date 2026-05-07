@@ -142,9 +142,9 @@ public class MyGame extends VariableFrameRateGame {
     private TextureImage grass;
     public TextureImage grassHM;
 
-    private IAudioManager audioMgr; // sound
+    private IAudioManager am; // sound
     private Sound squeakSound;
-
+    private AudioResource deathSo;
 
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
@@ -180,12 +180,14 @@ public class MyGame extends VariableFrameRateGame {
 
     @Override
     public void loadSounds() {
-        AudioResource resource1, resource2;
-        audioMgr = engine.getAudioManager();
-        resource1 = audioMgr.createAudioResource("squeaking.mp3", AudioResourceType.AUDIO_SAMPLE);
-        // resource2 = audioMgr.createAudioResource("ocean.wav", AudioResourceType.AUDIO_SAMPLE);
-        squeakSound = new Sound(resource1, SoundType.SOUND_EFFECT, 100, true);
-        squeakSound.initialize(audioMgr);
+        am = engine.getAudioManager();
+        deathSo = am.createAudioResource("cash1.wav", AudioResourceType.AUDIO_SAMPLE);
+
+        // AudioResource squeakSo, resource2;
+        // squeakSo = am.createAudioResource("squeaking.mp3", AudioResourceType.AUDIO_SAMPLE);
+        // resource2 = am.createAudioResource("ocean.wav", AudioResourceType.AUDIO_SAMPLE);
+        // squeakSound = new Sound(squeakSo, SoundType.SOUND_EFFECT, 100, false);
+        // squeakSound.initialize(am);
         // squeakSound.setMaxDistance(10.0f);
         // squeakSound.setMinDistance(0.5f);
         // squeakSound.setRollOff(5.0f);
@@ -246,7 +248,6 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).setActiveSkyBoxTexture(mountainsBox);
         (engine.getSceneGraph()).setSkyBoxEnabled(true);
     }
-
 
     @Override
     public void buildObjects() {
@@ -422,17 +423,18 @@ public class MyGame extends VariableFrameRateGame {
         // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, turnActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
         // initial sound settings
-        squeakSound.setLocation(terr.getWorldLocation());
+        //------------initialize audio placement--------------------------
+        // squeakSound.setLocation(terr.getWorldLocation());
         setEarParameters();
-        squeakSound.play();
+        // squeakSound.play();
+        // squeakSound.stop();
     }
 
     public void setEarParameters() {
         Camera camera = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
-        audioMgr.getEar().setLocation(cursor.getWorldLocation());
-        audioMgr.getEar().setOrientation(camera.getN(), new Vector3f(0.0f, 1.0f, 0.0f));
+        am.getEar().setLocation(camera.getLocation());
+        am.getEar().setOrientation(camera.getU(), camera.getU());
     }
 
     @Override
@@ -556,8 +558,13 @@ public class MyGame extends VariableFrameRateGame {
         processNetworking((float) currFrameTime);
         protClient.sendMoveMessage(new Vector3f(dolPos));
 
-        // update sound
-        squeakSound.setLocation(terr.getWorldLocation());
+        // -----------update sound--------
+        if (!em.getDeathSounds().isEmpty()) {
+            for (int i = 0; i < em.getDeathSounds().size(); i++) {
+                (em.getDeathSounds().get(i)).setLocation(em.getEnemies().get(i).getWorldLocation());
+            }
+        }
+        // squeakSound.setLocation(terr.getWorldLocation());
         setEarParameters();
 
         //----------------update physics---------------
@@ -651,6 +658,10 @@ public class MyGame extends VariableFrameRateGame {
         return em;
     }
 
+    public IAudioManager getAudioManager() {
+        return am;
+    }
+
     public ObjShape getRockShape() {
         return sphereS;
     }
@@ -734,7 +745,7 @@ public class MyGame extends VariableFrameRateGame {
                 dolS.stopAnimation();
                 dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
                 break;
-            
+
             case KeyEvent.VK_R:
                 dolS.stopAnimation();
                 break;
@@ -744,9 +755,10 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     private void spawnEnemy(float sp) {
+        //create enemy graphics  
         Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, sp);
         em.addEnemy(testEnemy);
-
+        //create enemy physics
         float mass = 1.0f;
         float up[] = {0, 1, 0};
         float radius = 1.5f;
@@ -762,9 +774,26 @@ public class MyGame extends VariableFrameRateGame {
         testEnemyP.setBounciness(0.5f);
         // testEnemyP.disableSleeping();
         // testEnemy.setPhysicsObject(testEnemyP);
-
         em.addEnemyP(testEnemyP);
 
+        //create enemyDeathSound
+        Sound deathSound = new Sound(deathSo, SoundType.SOUND_EFFECT, 80, false);
+        deathSound.initialize(am);
+        deathSound.setMaxDistance(10.0f);
+        deathSound.setMinDistance(0.5f);
+        deathSound.setRollOff(10.0f);
+        // deathSound.play();
+
+        em.addDeathSound(deathSound);
+
+        // AudioResource squeakSo, resource2;
+        // squeakSo = am.createAudioResource("squeaking.mp3", AudioResourceType.AUDIO_SAMPLE);
+        // resource2 = am.createAudioResource("ocean.wav", AudioResourceType.AUDIO_SAMPLE);
+        // squeakSound = new Sound(squeakSo, SoundType.SOUND_EFFECT, 100, false);
+        // squeakSound.initialize(am);
+        // squeakSound.setMaxDistance(10.0f);
+        // squeakSound.setMinDistance(0.5f);
+        // squeakSound.setRollOff(5.0f);
     }
 
     private void placeTower() {

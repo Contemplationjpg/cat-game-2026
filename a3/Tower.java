@@ -34,4 +34,8 @@ public class Tower extends GameObject {
         return home;
     }
 
+    public TowerType getTowerType() {
+        return towerType;
+    }
+
 }
