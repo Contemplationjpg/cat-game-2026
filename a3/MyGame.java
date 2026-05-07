@@ -280,6 +280,8 @@ public class MyGame extends VariableFrameRateGame {
         cursor = new GameObject(GameObject.root(), cursorS, gas);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
         cursor.setLocalTranslation(initialTranslation);
+        initialScale = (new Matrix4f()).scaling(0.5f);
+        cursor.setLocalScale(initialScale);
 
         //------------------- setting up grid of tiles ----------
         //read board
@@ -340,7 +342,9 @@ public class MyGame extends VariableFrameRateGame {
                 if ((grid[x][z].getTileType().getName()).equals("trail")) {
                     table.setTextureImage(purplebrick);
                 } else if (grid[x][z].getTileType().getName().equals("unplacable")) {
-                    table.setShape(dolS);
+                    table.setShape(cursorS);
+                    initialScale = (new Matrix4f()).scaling(0.25f);
+                    table.setLocalScale(initialScale);
                 }
                 table.setLocalTranslation(initTrans);
                 // grid[x][z].setTower((Tower) table);
