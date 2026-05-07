@@ -28,7 +28,7 @@ public class EnemyManager {
                 for (int j = 0; j < game.getTowerManager().getRocks().size(); j++) {
                     if (colls.contains(game.getTowerManager().getRocks().get(j))) {
                         enemies.get(i).takeDamage(1);
-                        System.out.println("Health: " + enemies.get(i).getHealth());
+                        // System.out.println("Health: " + enemies.get(i).getHealth());
                     }
                 }
 

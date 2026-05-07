@@ -322,12 +322,11 @@ public class MyGame extends VariableFrameRateGame {
             }
         }
 
-        test = new GameObject(GameObject.root(), tableS, doltx);
-        initialTranslation = (new Matrix4f()).translation(0, 10, 0);
-        initialScale = (new Matrix4f()).scaling(2.0f);
-        test.setLocalTranslation(initialTranslation);
-        test.setLocalScale(initialScale);
-
+        // test = new GameObject(GameObject.root(), tableS, doltx);
+        // initialTranslation = (new Matrix4f()).translation(0, 10, 0);
+        // initialScale = (new Matrix4f()).scaling(2.0f);
+        // test.setLocalTranslation(initialTranslation);
+        // test.setLocalScale(initialScale);
     }
 
     @Override
@@ -415,14 +414,13 @@ public class MyGame extends VariableFrameRateGame {
         Vector3f loc;
         Quaternionf rot;
 
-        loc = test.getWorldLocation();
-        rot = new Quaternionf();
-        (test.getWorldRotation()).getNormalizedRotation(rot);
-        testP = (engine.getSceneGraph()).addPhysicsCapsule(mass, loc, rot, 0, radius, height);
-        testP.setBounciness(0.8f);
-        testP.disableSleeping();
-        test.setPhysicsObject(testP);
-
+        // loc = test.getWorldLocation();
+        // rot = new Quaternionf();
+        // (test.getWorldRotation()).getNormalizedRotation(rot);
+        // testP = (engine.getSceneGraph()).addPhysicsCapsule(mass, loc, rot, 0, radius, height);
+        // testP.setBounciness(0.8f);
+        // testP.disableSleeping();
+        // test.setPhysicsObject(testP);
         loc = terr.getWorldLocation();
         rot = new Quaternionf();
         (terr.getWorldRotation()).getNormalizedRotation(rot);
@@ -725,15 +723,16 @@ public class MyGame extends VariableFrameRateGame {
             TowerType t = new BasicTower("test", dolS, gas);
             Tower testTower = new Tower(this, t);
             targetTile.setTower(testTower);
+            testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering();;
             System.out.println("tower placed!");
         } else {
             System.out.println("tower not placed!");
-
         }
     }
 
     private void removeTower() {
         grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]].removeTower();
+        testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().enableRendering();;
         System.out.println("tower removed!");
     }
 
