@@ -1,6 +1,7 @@
 package a3;
 
 import org.joml.Vector3f;
+import tage.physics.PhysicsObject;
 
 public class Tile {
 
@@ -50,8 +51,11 @@ public class Tile {
 
     public void removeTower() {
         if (tower != null) {
+            PhysicsObject rock = (game.getTowerManager()).getRocks().get((game.getTowerManager().getTowers()).indexOf(tower));
+            (game.getTowerManager()).removeRock(rock);
             (game.getTowerManager()).removeTower(tower);
             game.getEngine().getSceneGraph().removeGameObject(tower);
+            game.getEngine().getSceneGraph().removePhysicsObject(rock);
             tower = null;
         }
     }

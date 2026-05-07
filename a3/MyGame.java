@@ -86,7 +86,7 @@ public class MyGame extends VariableFrameRateGame {
     private GameObject plane;
     private ObjShape planeS;
 
-    // private GameObject sphere;
+    private ObjShape sphereS;
     private ObjShape tableS;
     private GameObject testTables[][];
 
@@ -199,6 +199,7 @@ public class MyGame extends VariableFrameRateGame {
         tableS = new ImportedModel("table.obj");
 
         planeS = new Plane();
+        sphereS = new Sphere();
 
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
 
@@ -410,7 +411,7 @@ public class MyGame extends VariableFrameRateGame {
         float mass = 1.0f;
         float up[] = {0, 1, 0};
         float radius = 0.75f;
-        float height = 1.0f;
+        float height = 2.0f;
         Vector3f loc;
         Quaternionf rot;
 
@@ -430,8 +431,27 @@ public class MyGame extends VariableFrameRateGame {
         terrP.setBounciness(1.0f);
         terr.setPhysicsObject(terrP);
 
-        engine.enableGraphicsWorldRender();
-        engine.enablePhysicsWorldRender();
+        // engine.enableGraphicsWorldRender();
+        // engine.enablePhysicsWorldRender();
+    }
+
+    public PhysicsObject createPhysicsRock(GameObject rock) {
+        float mass = 1.0f;
+        float up[] = {0, 1, 0};
+        float radius = 0.75f;
+        float height = 2.0f;
+        Vector3f loc;
+        Quaternionf rot;
+        PhysicsObject out;
+
+        loc = rock.getWorldLocation();
+        rot = new Quaternionf();
+        (rock.getWorldRotation()).getNormalizedRotation(rot);
+        out = (engine.getSceneGraph()).addPhysicsSphere(mass, loc, rot, radius);
+        out.setBounciness(0.5f);
+        out.disableSleeping();
+        rock.setPhysicsObject(out);
+        return out;
     }
 
     private void setupNetworking() {
@@ -522,6 +542,7 @@ public class MyGame extends VariableFrameRateGame {
                 go.setLocalRotation(rotMat);
             }
         }
+        pe.detectCollisions();
 
     }
 
@@ -589,6 +610,14 @@ public class MyGame extends VariableFrameRateGame {
 
     public EnemyManager getEnemyManager() {
         return em;
+    }
+
+    public ObjShape getRockShape() {
+        return sphereS;
+    }
+
+    public TextureImage getRockTexture() {
+        return gas;
     }
 
     public Vector3f getPlayerPosition() {
@@ -668,6 +697,25 @@ public class MyGame extends VariableFrameRateGame {
     private void spawnEnemy(float sp) {
         Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, sp);
         em.addEnemy(testEnemy);
+
+        float mass = 1.0f;
+        float up[] = {0, 1, 0};
+        float radius = 1.5f;
+        float height = 0.5f;
+        Vector3f loc;
+        Quaternionf rot;
+        PhysicsObject testEnemyP;
+
+        loc = testEnemy.getWorldLocation();
+        rot = new Quaternionf();
+        (testEnemy.getWorldRotation()).getNormalizedRotation(rot);
+        testEnemyP = (engine.getSceneGraph()).addPhysicsCapsule(0, loc, rot, 0, radius, height);
+        testEnemyP.setBounciness(0.5f);
+        // testEnemyP.disableSleeping();
+        // testEnemy.setPhysicsObject(testEnemyP);
+
+        em.addEnemyP(testEnemyP);
+
     }
 
     private void placeTower() {
