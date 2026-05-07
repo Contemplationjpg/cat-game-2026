@@ -12,6 +12,7 @@ public class Enemy extends GameObject {
     private int nextTileOnPath = 1;
     private float speed = 1f;
     private boolean isAtEndOfPath = false;
+    private int health = 3;
 
     public Enemy(GameObject p, ObjShape s, TextureImage t, MyGame g) {
         super(p, s, t);
@@ -54,8 +55,19 @@ public class Enemy extends GameObject {
         }
     }
 
+    public void takeDamage(int amount) {
+        health -= amount;
+        if (health < 0) {
+            health = 0;
+        }
+    }
+
     public boolean getIsAtEndOfPath() {
         return isAtEndOfPath;
+    }
+
+    public int getHealth() {
+        return health;
     }
 
     public double detectDistance(org.joml.Vector3f a, org.joml.Vector3f b) {

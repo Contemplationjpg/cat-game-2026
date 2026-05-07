@@ -86,7 +86,7 @@ public class TowerType {
         }
     }
 
-    public void towerAI(Tower t, double deltaTime) {
+    public void towerAI(MyGame g, Tower t, double deltaTime) {
         return;
     }
 
