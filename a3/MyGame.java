@@ -16,6 +16,7 @@ import tage.rml.Vector3;
 // import tage.rml.Vector3f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.joml.Quaternionf;
 // import tage.rml.Vector4f;
 
 import tage.shapes.ImportedModel;
@@ -35,10 +36,12 @@ import tage.nodeControllers.ScaleController;
 import tage.networking.IGameConnection.ProtocolType;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import tage.physics.*;
 
 public class MyGame extends VariableFrameRateGame {
 
     private static Engine engine;
+    private static PhysicsEngine pe;
 
     private boolean paused = false;
     private int counter = 0;
@@ -48,6 +51,10 @@ public class MyGame extends VariableFrameRateGame {
 
     private CameraOrbitController orbitController;
     private OverheadCameraController overheadController;
+
+    private PhysicsObject terrP;
+    private GameObject test;
+    private PhysicsObject testP;
 
     private GameObject dol;
     private ObjShape dolS;
@@ -91,6 +98,7 @@ public class MyGame extends VariableFrameRateGame {
     private InputManager im;
     private CursorManager cm;
     private EnemyManager em;
+    private TowerManager tm;
 
     private float[] turnDirY; //Y axis turn is left and right
     private final float turnSpeedY = 0.08f;
@@ -271,15 +279,15 @@ public class MyGame extends VariableFrameRateGame {
             tempZ = (-gridHeight / 2) * tileHeight; //starting Z
             for (int z = 0; z < gridHeight; z++) {
                 Vector3f tempPos = new Vector3f(tempX + (tileWidth / 2), 0f, tempZ + (tileHeight / 2));
-                Tile tempTile = new Tile(placableTile, tempPos);
+                Tile tempTile = new Tile(this, placableTile, tempPos);
                 if (board != null) {
                     try {
                         if (board.get(z).get(x).equals("p")) {
-                            tempTile = new Tile(placableTile, tempPos);
+                            tempTile = new Tile(this, placableTile, tempPos);
                         } else if (board.get(z).get(x).equals("t")) {
-                            tempTile = new Tile(trailTile, tempPos);
+                            tempTile = new Tile(this, trailTile, tempPos);
                         } else if (board.get(z).get(x).equals("u")) {
-                            tempTile = new Tile(unplacableTile, tempPos);
+                            tempTile = new Tile(this, unplacableTile, tempPos);
                         }
                     } catch (Exception e) {
                         System.err.println(e);
@@ -313,6 +321,12 @@ public class MyGame extends VariableFrameRateGame {
             }
         }
 
+        test = new GameObject(GameObject.root(), tableS, doltx);
+        initialTranslation = (new Matrix4f()).translation(0, 10, 0);
+        initialScale = (new Matrix4f()).scaling(2.0f);
+        test.setLocalTranslation(initialTranslation);
+        test.setLocalScale(initialScale);
+
     }
 
     @Override
@@ -338,6 +352,7 @@ public class MyGame extends VariableFrameRateGame {
         im = engine.getInputManager();
         cm = new CursorManager(this);
         em = new EnemyManager(this);
+        tm = new TowerManager(this);
         setupNetworking();
 
         lastFrameTime = System.currentTimeMillis();
@@ -385,6 +400,40 @@ public class MyGame extends VariableFrameRateGame {
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
     }
 
+    @Override
+    public void initializePhysicsObjects() {
+        float[] gravity = {0f, -5f, 0f};
+        pe = (engine.getSceneGraph()).getPhysicsEngine();
+        pe.setGravity(gravity);
+
+        //------create physics world----
+        float mass = 1.0f;
+        float up[] = {0, 1, 0};
+        float radius = 0.75f;
+        float height = 1.0f;
+        Vector3f loc;
+        Quaternionf rot;
+
+        loc = test.getWorldLocation();
+        rot = new Quaternionf();
+        (test.getWorldRotation()).getNormalizedRotation(rot);
+        testP = (engine.getSceneGraph()).addPhysicsCapsule(mass, loc, rot, 0, radius, height);
+        testP.setBounciness(0.8f);
+        testP.disableSleeping();
+        test.setPhysicsObject(testP);
+
+        loc = terr.getWorldLocation();
+        rot = new Quaternionf();
+        (terr.getWorldRotation()).getNormalizedRotation(rot);
+        terrP = (engine.getSceneGraph()).addPhysicsStaticPlane(loc, rot, up, 0.0f);
+
+        terrP.setBounciness(1.0f);
+        terr.setPhysicsObject(terrP);
+
+        engine.enableGraphicsWorldRender();
+        engine.enablePhysicsWorldRender();
+    }
+
     private void setupNetworking() {
         isClientConnected = false;
         try {
@@ -417,6 +466,7 @@ public class MyGame extends VariableFrameRateGame {
 
         cm.updateCursor();
         em.updateAllEnemies(deltaTime);
+        tm.updateAllTowers(deltaTime);
 
         // System.out.println(deltaTime);
         //-----------------update inputs-------------
@@ -452,6 +502,26 @@ public class MyGame extends VariableFrameRateGame {
 
         processNetworking((float) currFrameTime);
         protClient.sendMoveMessage(new Vector3f(dolPos));
+
+        //----------------update physics---------------
+        pe.update((float) deltaTime);
+        for (GameObject go : engine.getSceneGraph().getGameObjects()) {
+            if (go.getPhysicsObject() != null) {
+                //set translation
+                Vector3f loc = go.getPhysicsObject().getLocation();
+                Matrix4f locMat = new Matrix4f();
+                locMat.set(3, 0, loc.x);
+                locMat.set(3, 1, loc.y);
+                locMat.set(3, 2, loc.z);
+                go.setLocalTranslation(locMat);
+
+                //set rotation
+                Quaternionf rot = go.getPhysicsObject().getRotation();
+                Matrix4f rotMat = new Matrix4f();
+                rot.get(rotMat);
+                go.setLocalRotation(rotMat);
+            }
+        }
 
     }
 
@@ -513,6 +583,14 @@ public class MyGame extends VariableFrameRateGame {
         return gm;
     }
 
+    public TowerManager getTowerManager() {
+        return tm;
+    }
+
+    public EnemyManager getEnemyManager() {
+        return em;
+    }
+
     public Vector3f getPlayerPosition() {
         return dol.getWorldLocation();
     }
@@ -541,7 +619,7 @@ public class MyGame extends VariableFrameRateGame {
         return deltaTime;
     }
 
-    public double detectDistance(org.joml.Vector3f a, org.joml.Vector3f b) {
+    public static double detectDistance(org.joml.Vector3f a, org.joml.Vector3f b) {
         try {
             double x = a.x() - b.x();
             x = Math.pow(x, 2);
@@ -577,6 +655,12 @@ public class MyGame extends VariableFrameRateGame {
             case KeyEvent.VK_3:
                 spawnEnemy(5.0f);
                 break;
+            case KeyEvent.VK_5:
+                placeTower();
+                break;
+            case KeyEvent.VK_6:
+                removeTower();
+                break;
         }
         super.keyPressed(e);
     }
@@ -584,6 +668,25 @@ public class MyGame extends VariableFrameRateGame {
     private void spawnEnemy(float sp) {
         Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, sp);
         em.addEnemy(testEnemy);
+    }
+
+    private void placeTower() {
+        Tile targetTile = grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]];
+
+        if (targetTile.getTowerable()) {
+            TowerType t = new BasicTower("test", dolS, gas);
+            Tower testTower = new Tower(this, t);
+            targetTile.setTower(testTower);
+            System.out.println("tower placed!");
+        } else {
+            System.out.println("tower not placed!");
+
+        }
+    }
+
+    private void removeTower() {
+        grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]].removeTower();
+        System.out.println("tower removed!");
     }
 
 }

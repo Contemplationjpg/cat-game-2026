@@ -27,8 +27,13 @@ public class TowerManager {
         towers.add(t);
     }
 
+    public void removeTower(Tower t) {
+        towers.remove(t);
+    }
+
     public ArrayList<Tower> getTowers() {
         return towers;
     }
+    
 
 }
