@@ -38,6 +38,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import tage.physics.*;
 
+import tage.audio.*;
+
 public class MyGame extends VariableFrameRateGame {
 
     private static Engine engine;
@@ -139,6 +141,9 @@ public class MyGame extends VariableFrameRateGame {
     private TextureImage grass;
     public TextureImage grassHM;
 
+    private IAudioManager audioMgr; // sound
+    private Sound squeakSound;
+
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         this.serverAddress = serverAddress;
@@ -169,6 +174,19 @@ public class MyGame extends VariableFrameRateGame {
         game.startGame();
         // FindComponents f = new FindComponents();
         // f.listControllers();
+    }
+
+    @Override
+    public void loadSounds() {
+        AudioResource resource1, resource2;
+        audioMgr = engine.getAudioManager();
+        resource1 = audioMgr.createAudioResource("squeaking.mp3", AudioResourceType.AUDIO_SAMPLE);
+        // resource2 = audioMgr.createAudioResource("ocean.wav", AudioResourceType.AUDIO_SAMPLE);
+        squeakSound = new Sound(resource1, SoundType.SOUND_EFFECT, 100, true);
+        squeakSound.initialize(audioMgr);
+        // squeakSound.setMaxDistance(10.0f);
+        // squeakSound.setMinDistance(0.5f);
+        // squeakSound.setRollOff(5.0f);
     }
 
     @Override
@@ -223,6 +241,7 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).setActiveSkyBoxTexture(mountainsBox);
         (engine.getSceneGraph()).setSkyBoxEnabled(true);
     }
+
 
     @Override
     public void buildObjects() {
@@ -398,6 +417,17 @@ public class MyGame extends VariableFrameRateGame {
         // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, turnActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+        // initial sound settings
+        squeakSound.setLocation(terr.getWorldLocation());
+        setEarParameters();
+        squeakSound.play();
+    }
+
+    public void setEarParameters() {
+        Camera camera = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
+        audioMgr.getEar().setLocation(cursor.getWorldLocation());
+        audioMgr.getEar().setOrientation(camera.getN(), new Vector3f(0.0f, 1.0f, 0.0f));
     }
 
     @Override
@@ -521,6 +551,9 @@ public class MyGame extends VariableFrameRateGame {
         processNetworking((float) currFrameTime);
         protClient.sendMoveMessage(new Vector3f(dolPos));
 
+        // update sound
+        squeakSound.setLocation(terr.getWorldLocation());
+        setEarParameters();
         //----------------update physics---------------
         pe.update((float) deltaTime);
         for (GameObject go : engine.getSceneGraph().getGameObjects()) {
