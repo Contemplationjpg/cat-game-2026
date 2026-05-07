@@ -59,7 +59,8 @@ public class MyGame extends VariableFrameRateGame {
     private PhysicsObject testP;
 
     private GameObject dol;
-    private ObjShape dolS;
+    // private ObjShape dolS;
+    private AnimatedShape dolS;
     private TextureImage doltx;
 
     private GameObject ghost;
@@ -144,6 +145,7 @@ public class MyGame extends VariableFrameRateGame {
     private IAudioManager audioMgr; // sound
     private Sound squeakSound;
 
+
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         this.serverAddress = serverAddress;
@@ -213,7 +215,10 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void loadShapes() {
         // dolS = new ImportedModel("dolphinHighPoly.obj");
-        dolS = new ImportedModel("rat.obj");
+        // dolS = new ImportedModel("rat.obj");
+        dolS = new AnimatedShape("rat.rkm", "rat.rks");
+        dolS.loadAnimation("WAG", "ratTailWag.rka");
+
         tableS = new ImportedModel("table.obj");
 
         planeS = new Plane();
@@ -554,6 +559,7 @@ public class MyGame extends VariableFrameRateGame {
         // update sound
         squeakSound.setLocation(terr.getWorldLocation());
         setEarParameters();
+
         //----------------update physics---------------
         pe.update((float) deltaTime);
         for (GameObject go : engine.getSceneGraph().getGameObjects()) {
@@ -574,6 +580,8 @@ public class MyGame extends VariableFrameRateGame {
             }
         }
         pe.detectCollisions();
+
+        dolS.updateAnimation();
 
     }
 
@@ -721,6 +729,16 @@ public class MyGame extends VariableFrameRateGame {
             case KeyEvent.VK_6:
                 removeTower();
                 break;
+
+            case KeyEvent.VK_E:
+                dolS.stopAnimation();
+                dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
+                break;
+            
+            case KeyEvent.VK_R:
+                dolS.stopAnimation();
+                break;
+
         }
         super.keyPressed(e);
     }
