@@ -68,7 +68,7 @@ public class BasicTower extends TowerType {
 
     private void createNewRock() {
         if (projectile == null && tower != null) {
-            System.out.println("making projectile");
+            // System.out.println("making projectile");
             projectile = new GameObject(GameObject.root(), game.getRockShape(), game.getRockTexture());
             projectileP = game.createPhysicsRock(projectile);
             Matrix4f initialTranslation = (new Matrix4f()).translation(tower.getLocalLocation());

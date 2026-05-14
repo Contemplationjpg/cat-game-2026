@@ -45,18 +45,15 @@ public class MyGame extends VariableFrameRateGame {
     private static Engine engine;
     private static PhysicsEngine pe;
 
-    private boolean paused = false;
-    private int counter = 0;
     private double lastFrameTime, currFrameTime, deltaTime;
 
     private boolean isOrbitMode = false;
+    private boolean paused = false;
 
     private CameraOrbitController orbitController;
     private OverheadCameraController overheadController;
 
     private PhysicsObject terrP;
-    private GameObject test;
-    private PhysicsObject testP;
 
     private GameObject dol;
     // private ObjShape dolS;
@@ -67,27 +64,10 @@ public class MyGame extends VariableFrameRateGame {
     private ObjShape ghostS;
     private TextureImage ghostT;
 
-    private GameObject plan1, plan2, plan3;
-    private ObjShape planS1, planS2, planS3;
     private TextureImage brick;
     private TextureImage gas;
     private TextureImage purplebrick;
-
-    private GameObject x, y, z;
-    private ObjShape linxS, linyS, linzS;
-
-    private GameObject house;
-    private ObjShape houseS;
     private TextureImage bluebrick;
-
-    private GameObject pho1, pho2, pho3;
-    private ObjShape phoS1, phoS2, phoS3;
-
-    private GameObject homepho1, homepho2, homepho3;
-    private ObjShape homephoS1, homephoS2, homephoS3;
-
-    private GameObject plane;
-    private ObjShape planeS;
 
     private ObjShape sphereS;
     private ObjShape tableS;
@@ -103,15 +83,8 @@ public class MyGame extends VariableFrameRateGame {
     private EnemyManager em;
     private TowerManager tm;
 
-    private float[] turnDirY; //Y axis turn is left and right
-    private final float turnSpeedY = 0.08f;
-
-    private float[] turnDirX; //X axis turn is up and down
-    private final float turnSpeedX = 0.08f;
-
-    private Vector3f loc, fwd, up, right, newLocation;
-    private Camera cam, overheadCam;
-    private Viewport camVp, overheadVp;
+    private Camera cam;
+    private Viewport camVp;
 
     String dispStr1 = "";
     String dispStr2 = "";
@@ -122,11 +95,6 @@ public class MyGame extends VariableFrameRateGame {
     private ProtocolType serverProtocol = ProtocolType.UDP;
     private ProtocolClient protClient;
     private boolean isClientConnected = false;
-
-    private final Vector3f homePos = new Vector3f(0, 0, 5);
-
-    private boolean gameWon;
-    private boolean gameLost;
 
     private Tile[][] grid; //grid[x][y]
     private final int gridWidth = 10;
@@ -143,7 +111,6 @@ public class MyGame extends VariableFrameRateGame {
     public TextureImage grassHM;
 
     private IAudioManager am; // sound
-    private Sound squeakSound;
     private AudioResource deathSo;
 
     public MyGame(String serverAddress, int serverPort, String protocol) {
@@ -223,7 +190,6 @@ public class MyGame extends VariableFrameRateGame {
 
         tableS = new ImportedModel("table.obj");
 
-        planeS = new Plane();
         sphereS = new Sphere();
 
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
@@ -396,8 +362,6 @@ public class MyGame extends VariableFrameRateGame {
         orbitController = new CameraOrbitController(cam, this, gamepadName, engine); //FOR ORBIT CONTROLLER
         overheadController = new OverheadCameraController(cam, gamepadName, engine); //FOR OVERHEAD CONTROLLER
 
-        turnDirY = new float[2];
-        turnDirX = new float[2];
         (engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0f, 20f, 0f));
         // (engine.getRenderSystem().getViewport("MAIN").getCamera()).setU(new Vector3f(1f, 0f, 0f));
         // (engine.getRenderSystem().getViewport("MAIN").getCamera()).setV(new Vector3f(0f, 1f, 0f));

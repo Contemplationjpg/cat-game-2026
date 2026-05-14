@@ -41,7 +41,7 @@ public class Tile {
 
     public boolean setTower(Tower tw) {
         if (type.getTowerable() && tower == null) {
-            System.out.println("I am Tile: setting tower");
+            // System.out.println("I am Tile: setting tower");
             tower = tw;
             (game.getTowerManager()).addTower(tower);
             tower.setLocalLocation(position);
