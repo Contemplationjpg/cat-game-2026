@@ -41,6 +41,7 @@ public class Tile {
 
     public boolean setTower(Tower tw) {
         if (type.getTowerable() && tower == null) {
+            System.out.println("I am Tile: setting tower");
             tower = tw;
             (game.getTowerManager()).addTower(tower);
             tower.setLocalLocation(position);
@@ -50,10 +51,21 @@ public class Tile {
     }
 
     public void removeTower() {
-        if (tower != null) {
-            PhysicsObject rock = (game.getTowerManager()).getRocks().get((game.getTowerManager().getTowers()).indexOf(tower));
+        if (hasTower()) {
+            // PhysicsObject rock = (game.getTowerManager()).getRocks().get((game.getTowerManager().getTowers()).indexOf(tower));
+            PhysicsObject rock = tower.getTowerType().getProjectileP();
+            if (rock != null) {
+                // System.out.println("rock");
+                if (game.getTowerManager().checkForRock(rock)) {
+                    // System.out.println("there IS a rock");
+                }
+            } else {
+                // System.out.println("no rock");
+            }
+
             (game.getTowerManager()).removeRock(rock);
             (game.getTowerManager()).removeTower(tower);
+            tower.getTowerType().onRemove();
             game.getEngine().getSceneGraph().removeGameObject(tower);
             game.getEngine().getSceneGraph().removePhysicsObject(rock);
             tower = null;

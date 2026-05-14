@@ -13,46 +13,43 @@ public class BasicTower extends TowerType {
 
     private Enemy target = null;
     private double range = 20f;
-    private GameObject projectile = null;
-    private PhysicsObject projectileP = null;
     private final double projDelay = 1.5;
+    private final double pickupDelay = 5.0;
     private final float projStrength = 100.0f;
-    private double timer;
+    private double attackTimer;
+    private double pickupTimer;
 
-    public BasicTower(String s) {
-        super(s);
+    // public BasicTower(String s) {
+    //     super(s);
+    // }
+    // public BasicTower(String n, ObjShape m) {
+    //     super(n, m);
+    // }
+    // public BasicTower(String n, String mStr) {
+    //     super(n, mStr);
+    // }
+    public BasicTower(MyGame g, Tower t, String n, ObjShape m, TextureImage ti) {
+        super(g, t, n, m, ti);
+        createNewRock();
     }
 
-    public BasicTower(String n, ObjShape m) {
-        super(n, m);
-    }
-
-    public BasicTower(String n, String mStr) {
-        super(n, mStr);
-    }
-
-    public BasicTower(String n, ObjShape m, TextureImage t) {
-        super(n, m, t);
-    }
-
-    public BasicTower(String n, String mStr, TextureImage t) {
-        super(n, mStr, t);
-    }
-
-    public BasicTower(String n, ObjShape m, String tStr) {
-        super(n, m, tStr);
-    }
-
-    public BasicTower(String n, String mStr, String tStr) {
-        super(n, mStr, tStr);
-    }
-
-    public void searchFirstEnemy(Tower t, ArrayList<Enemy> es) {
+    // public BasicTower(String n, String mStr, TextureImage t) {
+    //     super(n, mStr, t);
+    // }
+    // public BasicTower(String n, ObjShape m, String tStr) {
+    //     super(n, m, tStr);
+    // }
+    // public BasicTower(String n, String mStr, String tStr) {
+    //     super(n, mStr, tStr);
+    // }
+    public void searchFirstEnemy() {
         // System.out.println("searching for enemy");
+
+        ArrayList<Enemy> es = game.getEnemyManager().getEnemies();
         double closestDist = 10000f;
         Enemy closestEnemy = null;
         for (int i = 0; i < es.size(); i++) {
-            double tempDist = MyGame.detectDistance(t.getWorldLocation(), es.get(i).getWorldLocation());
+            double tempDist = MyGame.detectDistance(tower.getWorldLocation(), es.get(i).getWorldLocation());
             // System.out.println("enemy " + i + " distance: " + tempDist);
             if (tempDist < closestDist && tempDist <= range) {
                 closestEnemy = es.get(i);
@@ -69,27 +66,41 @@ public class BasicTower extends TowerType {
         }
     }
 
-    public void attackTarget(MyGame g, Tower t) {
-        // System.out.println("I have target");
-        if (MyGame.detectDistance(t.getWorldLocation(), target.getWorldLocation()) > range || target.getHealth() <= 0) {
-            target = null;
-            return;
-        }
-        t.lookAt(target);
-        //create projectile if not created yet
-        if (projectile == null) {
-            projectile = new GameObject(GameObject.root(), g.getRockShape(), g.getRockTexture());
-            projectileP = g.createPhysicsRock(projectile);
-            Matrix4f initialTranslation = (new Matrix4f()).translation(t.getLocalLocation());
+    private void createNewRock() {
+        if (projectile == null && tower != null) {
+            System.out.println("making projectile");
+            projectile = new GameObject(GameObject.root(), game.getRockShape(), game.getRockTexture());
+            projectileP = game.createPhysicsRock(projectile);
+            Matrix4f initialTranslation = (new Matrix4f()).translation(tower.getLocalLocation());
             Matrix4f initialScale = (new Matrix4f()).scaling(0.5f);
             projectile.setLocalTranslation(initialTranslation);
             projectile.setLocalScale(initialScale);
-            g.getTowerManager().addRock(projectileP);
+            game.getTowerManager().addRock(projectileP);
+            projectileP.setTransform(tower.getWorldLocation(), projectileP.getRotation());
         }
+    }
+
+    @Override
+    protected void onRemove() {
+        game.getEngine().getSceneGraph().removeGameObject(projectile);
+    }
+
+    public void attackTarget() {
+        // System.out.println("I have target, I am at " + tower.getWorldLocation());
+        if (MyGame.detectDistance(tower.getWorldLocation(), target.getWorldLocation()) > range || target.getHealth() <= 0) {
+            target = null;
+            return;
+        }
+        tower.lookAt(target);
+        //create projectile if not created yet
+        createNewRock();
         //throw projectile on timer (give attack cooldown)
-        if (timer <= 0) {
+        if (attackTimer <= 0) {
             // System.out.println("throwing");
-            Matrix4f initialTranslation = (new Matrix4f()).translation(t.getLocalLocation());
+            //enabling projectile
+            projectile.getRenderStates().enableRendering();
+            projectileP.disableSleeping();
+            Matrix4f initialTranslation = (new Matrix4f()).translation(tower.getLocalLocation());
             projectile.setLocalTranslation(initialTranslation);
             Vector3f loc = projectile.getWorldLocation();
             // float locF[] = {loc.x, loc.y, loc.z};
@@ -102,21 +113,35 @@ public class BasicTower extends TowerType {
             float throwingVelo[] = {dir.x * projStrength, 0f, dir.z * projStrength};
             // System.out.println(Arrays.toString(throwingVelo));
             projectileP.setLinearVelocity(throwingVelo);
-            timer = projDelay;
+            attackTimer = projDelay;
+            pickupTimer = pickupDelay;
         }
 
     }
 
     @Override
-    public void towerAI(MyGame g, Tower t, double deltaTime) {
+    public void towerAI(double deltaTime) {
         // System.out.println("I AM BASICTOWER");
-        timer -= deltaTime;
+        attackTimer -= deltaTime;
+        pickupTimer -= deltaTime;
         if (target == null) {
-            searchFirstEnemy(t, (g.getEnemyManager()).getEnemies());
+            searchFirstEnemy();
         } else {
-            attackTarget(g, t);
+            attackTarget();
         }
+        if (pickupTimer <= 0) {
+            Matrix4f initialTranslation = (new Matrix4f()).translation(tower.getLocalLocation());
+            projectile.setLocalTranslation(initialTranslation);
+            Vector3f loc = projectile.getWorldLocation();
+            projectileP.setTransform(loc, (projectile.getWorldRotation()).getNormalizedRotation(new Quaternionf()));
+            //disabling projectile
+            projectile.getRenderStates().disableRendering();
+            projectileP.enableSleeping();
 
+            // System.out.println("picking up rock");
+        } else {
+            // System.out.println("not picking up rock");
+        }
     }
 
 }

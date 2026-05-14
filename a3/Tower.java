@@ -5,9 +5,14 @@ import org.joml.Vector3f;
 
 public class Tower extends GameObject {
 
-    private TowerType towerType;
+    private TowerType towerType = null;
     private MyGame game;
     private int[] home = new int[2];
+
+    public Tower(MyGame g) {
+        super(GameObject.root());
+        game = g;
+    }
 
     public Tower(MyGame g, TowerType tT) {
         super(GameObject.root(), tT.getModel(), tT.getTexture());
@@ -23,7 +28,9 @@ public class Tower extends GameObject {
     }
 
     public void updateTowerAI(double deltaTime) {
-        towerType.towerAI(game, this, deltaTime);
+        if (towerType != null) {
+            towerType.towerAI(deltaTime);
+        }
     }
 
     public void setHome(int[] h) {
@@ -32,6 +39,17 @@ public class Tower extends GameObject {
 
     public int[] getHome() {
         return home;
+    }
+
+    public void setTowerType(TowerType tT) {
+        towerType = tT;
+        setShape(tT.getModel());
+        setTextureImage(tT.getTexture());
+        getRenderStates().enableRendering();
+    }
+
+    public TowerType getTowerType() {
+        return towerType;
     }
 
 }

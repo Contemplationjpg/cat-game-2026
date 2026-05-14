@@ -145,7 +145,6 @@ public class MyGame extends VariableFrameRateGame {
     private IAudioManager audioMgr; // sound
     private Sound squeakSound;
 
-
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         this.serverAddress = serverAddress;
@@ -248,7 +247,6 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getSceneGraph()).setActiveSkyBoxTexture(mountainsBox);
         (engine.getSceneGraph()).setSkyBoxEnabled(true);
     }
-
 
     @Override
     public void buildObjects() {
@@ -424,7 +422,6 @@ public class MyGame extends VariableFrameRateGame {
         // im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.X, turnActionPad, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.D, turnActionKeyR, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
         // im.associateActionWithAllKeyboards(net.java.games.input.Component.Identifier.Key.A, turnActionKeyL, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
         // initial sound settings
         squeakSound.setLocation(terr.getWorldLocation());
         setEarParameters();
@@ -736,7 +733,7 @@ public class MyGame extends VariableFrameRateGame {
                 dolS.stopAnimation();
                 dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
                 break;
-            
+
             case KeyEvent.VK_R:
                 dolS.stopAnimation();
                 break;
@@ -770,13 +767,14 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     private void placeTower() {
-        Tile targetTile = grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]];
+        Tile targetTile = grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]]; //get the target of the cursor
 
-        if (targetTile.getTowerable()) {
-            TowerType t = new BasicTower("test", dolS, gas);
-            Tower testTower = new Tower(this, t);
-            targetTile.setTower(testTower);
-            testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering();;
+        if (targetTile.getTowerable()) {//if tile is towerable (placable and not occupied)
+            Tower testTower = new Tower(this); //make new tower
+            TowerType t = new BasicTower(this, testTower, "test", dolS, gas); //make new TowerType
+            testTower.setTowerType(t); //give the TowerType to the Tower
+            targetTile.setTower(testTower); //assign the tower to the tile
+            testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering(); //hide the table
             System.out.println("tower placed!");
         } else {
             System.out.println("tower not placed!");
@@ -785,7 +783,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private void removeTower() {
         grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]].removeTower();
-        testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().enableRendering();;
+        testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().enableRendering();
         System.out.println("tower removed!");
     }
 

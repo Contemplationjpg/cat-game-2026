@@ -21,8 +21,10 @@ public class TowerManager {
         if (towers.isEmpty()) {
             return;
         }
+        // System.out.println("TowerManager: I have " + towers.size() + " towers");
         for (int i = 0; i < towers.size(); i++) {
             towers.get(i).updateTowerAI(deltaTime);
+            // System.out.println(rocks);
         }
     }
 
@@ -32,6 +34,7 @@ public class TowerManager {
 
     public void removeTower(Tower t) {
         towers.remove(t);
+        game.getEngine().getSceneGraph().removeGameObject(t);
     }
 
     public ArrayList<Tower> getTowers() {
@@ -44,10 +47,15 @@ public class TowerManager {
 
     public void removeRock(PhysicsObject r) {
         rocks.remove(r);
+        game.getEngine().getSceneGraph().removePhysicsObject(r);
     }
 
     public ArrayList<PhysicsObject> getRocks() {
         return rocks;
+    }
+
+    public Boolean checkForRock(PhysicsObject r) {
+        return rocks.contains(r);
     }
 
 }
