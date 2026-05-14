@@ -97,7 +97,6 @@ public class BasicTower extends TowerType {
         //throw projectile on timer (give attack cooldown)
         if (attackTimer <= 0) {
             // System.out.println("throwing");
-            //enabling projectile
             projectile.getRenderStates().enableRendering();
             projectileP.disableSleeping();
             Matrix4f initialTranslation = (new Matrix4f()).translation(tower.getLocalLocation());
