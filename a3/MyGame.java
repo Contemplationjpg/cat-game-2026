@@ -1,5 +1,6 @@
 package a3;
 
+
 import org.joml.*;
 
 import tage.*;
@@ -65,6 +66,8 @@ public class MyGame extends VariableFrameRateGame {
     // private ObjShape catS;
     private AnimatedShape catS;
     private TextureImage cattx;
+    private ObjShape bomberCatS;
+    private TextureImage bomberCattx;
 
     private GameObject ghost;
     private ObjShape ghostS;
@@ -81,6 +84,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private GameObject cursor;
     private ObjShape cursorS;
+    private TextureImage cursortx;
 
     private Light lightP1, lightP2, lightP3, lightH;
 
@@ -216,7 +220,7 @@ public class MyGame extends VariableFrameRateGame {
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
 
         cursorS = new ImportedModel("cursor.obj");
-
+        bomberCatS = new ImportedModel("artilleryCat.obj");
     }
 
     @Override
@@ -230,6 +234,9 @@ public class MyGame extends VariableFrameRateGame {
         grass = new TextureImage("grass.png");
         grassHM = new TextureImage("grassHM.png");
         cattx = new TextureImage("fullCat.png");
+        cursortx = new TextureImage("cursorTexture.png");
+        cursortx = new TextureImage("cursorTexture.png");
+        bomberCattx = new TextureImage("bomberCat.png");
     }
 
     @Override
@@ -281,7 +288,7 @@ public class MyGame extends VariableFrameRateGame {
         cursor.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(0.5f);
         cursor.setLocalScale(initialScale);
-        cursor.yaw(90f);
+        cursor.yaw(-45f);
 
         //------------------- setting up grid of tiles ----------
         //read board
@@ -826,6 +833,9 @@ public class MyGame extends VariableFrameRateGame {
                 // placeTower();
                 attemptToPlaceBasicTower(50);
                 break;
+            case KeyEvent.VK_8:
+                attemptToPlaceBomberTower(100);
+                break;
             case KeyEvent.VK_6:
                 removeTower();
                 break;
@@ -900,12 +910,34 @@ public class MyGame extends VariableFrameRateGame {
         }
     }
 
+    private void attemptToPlaceBomberTower(int cost) {
+        if (money >= cost) {
+            money-=cost;
+            placeBomberTower();
+        }
+    }
+
     private void placeTower() {
         Tile targetTile = grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]]; //get the target of the cursor
 
         if (targetTile.getTowerable()) {//if tile is towerable (placable and not occupied)
             Tower testTower = new Tower(this); //make new tower
             TowerType t = new BasicTower(this, testTower, "test", catS, cattx); //make new TowerType
+            testTower.setTowerType(t); //give the TowerType to the Tower
+            targetTile.setTower(testTower); //assign the tower to the tile
+            testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering(); //hide the table
+            System.out.println("tower placed!");
+        } else {
+            System.out.println("tower not placed!");
+        }
+    }
+
+    private void placeBomberTower() {
+        Tile targetTile = grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]]; //get the target of the cursor
+
+        if (targetTile.getTowerable()) {//if tile is towerable (placable and not occupied)
+            Tower testTower = new Tower(this); //make new tower
+            TowerType t = new BasicTower(this, testTower, "test", bomberCatS, bomberCattx); //make new TowerType
             testTower.setTowerType(t); //give the TowerType to the Tower
             targetTile.setTower(testTower); //assign the tower to the tile
             testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering(); //hide the table
