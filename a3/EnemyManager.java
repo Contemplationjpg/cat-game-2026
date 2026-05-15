@@ -50,6 +50,7 @@ public class EnemyManager {
     }
 
     private void destroyEnemyEarly(int i) {
+        game.increaseMoney(enemies.get(i).getReward());
         game.getEngine().getSceneGraph().removeGameObject(enemies.get(i));
         enemies.set(i, null);
         enemies.remove(i);
@@ -63,6 +64,7 @@ public class EnemyManager {
     }
 
     private void destroyEnemyEnd(int i) {
+        game.reduceHealth(enemies.get(i).getDamageToPlayer());
         game.getEngine().getSceneGraph().removeGameObject(enemies.get(i));
         enemies.set(i, null);
         enemies.remove(i);
@@ -71,13 +73,14 @@ public class EnemyManager {
         enemyPs.remove(i);
         deathSounds.set(i,null); //there might be a memory leak here?? Java data collection hopefully gets to it
         deathSounds.remove(i);
-        System.out.println("Enemy made it to end!");
+        // System.out.println("Enemy made it to end!");
+
     }
 
     private void destroyEnemyEnd(Enemy e) {
         game.getEngine().getSceneGraph().removeGameObject(e);
         enemies.remove(enemies.indexOf(e));
-        System.out.println("Enemy made it to end!");
+        // System.out.println("Enemy made it to end!");
     }
 
     public void addEnemy(Enemy e) {

@@ -1,6 +1,6 @@
 package a3;
 
-import org.joml.Vector3f;
+import org.joml.*;
 import tage.physics.PhysicsObject;
 
 public class Tile {
@@ -45,6 +45,8 @@ public class Tile {
             tower = tw;
             (game.getTowerManager()).addTower(tower);
             tower.setLocalLocation(position);
+            Matrix4f initTowerScale = (new Matrix4f()).scale(0.5f);
+            tower.setLocalScale(initTowerScale);
             return true;
         }
         return false;

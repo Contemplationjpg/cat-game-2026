@@ -28,7 +28,7 @@ public class OverheadCameraController {
     public OverheadCameraController(Camera cam, String gamepadName, Engine e) {
         engine = e;
         camera = cam;
-        cameraElevation = 55.0f;
+        cameraElevation = 70.0f;
         cameraX = 0.0f;
         cameraZ = 0.0f;
         speed = 1f;

@@ -30,4 +30,8 @@ public class WaveManager {
         return false;
     }
 
+    public int getMaxWaves() {
+        return waves.size();
+    }
+
 }

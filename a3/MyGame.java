@@ -49,6 +49,7 @@ public class MyGame extends VariableFrameRateGame {
 
     private boolean isOrbitMode = false;
     private boolean paused = false;
+    private boolean gameOver = false;
 
     private CameraOrbitController orbitController;
     private OverheadCameraController overheadController;
@@ -94,6 +95,7 @@ public class MyGame extends VariableFrameRateGame {
 
     String dispStr1 = "";
     String dispStr2 = "";
+    String dispStr3 = "";
 
     private GhostManager gm;
     private String serverAddress = "localhost";
@@ -120,8 +122,9 @@ public class MyGame extends VariableFrameRateGame {
     private AudioResource deathSo;
 
 //------------------STUFF FOR "THE GAME"--------------
-    private int money = 0;
+    private int money = 100;
     private int wave = 0;
+    private int health = 100;
 
     private boolean initialStart = false;
     private boolean setToProgress = false;
@@ -243,18 +246,16 @@ public class MyGame extends VariableFrameRateGame {
         // build dolphin in the center of the window
         // dol = new GameObject(GameObject.root(), dolS, doltx);
         dol = new GameObject(GameObject.root(), dolS, null);
-        cat = new GameObject(GameObject.root(), catS, cattx);
+        // cat = new GameObject(GameObject.root(), catS, cattx);
         initialTranslation = (new Matrix4f()).translation(0, -25, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
 
-        initialTranslation = (new Matrix4f()).translation(0, 10, 0);
-        initialScale = (new Matrix4f()).scaling(0.5f);
-
-        cat.setLocalTranslation(initialTranslation);
-        cat.setLocalScale(initialScale);
-
+        // initialTranslation = (new Matrix4f()).translation(0, 10, 0);
+        // initialScale = (new Matrix4f()).scaling(0.5f);
+        // cat.setLocalTranslation(initialTranslation);
+        // cat.setLocalScale(initialScale);
         // plane = new GameObject(GameObject.root(), planeS, gas);
         // Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
         // Matrix4f initTransPlane = (new Matrix4f()).translation(0, -2, 0);
@@ -263,17 +264,18 @@ public class MyGame extends VariableFrameRateGame {
         terr = new GameObject(GameObject.root(), terrS, grass);
         initialTranslation = (new Matrix4f()).translation(0f, -4f, 0f);
         terr.setLocalTranslation(initialTranslation);
-        initialScale = (new Matrix4f()).scaling(50.0f, 1.0f, 50.0f);
+        initialScale = (new Matrix4f()).scaling(150.0f, 1.0f, 150.0f);
         terr.setLocalScale(initialScale);
         terr.setHeightMap(grassHM);
-        terr.getRenderStates().setTiling(10);
-        terr.getRenderStates().setTileFactor(1);
+        terr.getRenderStates().setTiling(1);
+        terr.getRenderStates().setTileFactor(64);
 
         cursor = new GameObject(GameObject.root(), cursorS, cattx);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
         cursor.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(0.5f);
         cursor.setLocalScale(initialScale);
+        cursor.yaw(90f);
 
         //------------------- setting up grid of tiles ----------
         //read board
@@ -531,6 +533,10 @@ public class MyGame extends VariableFrameRateGame {
         em.updateAllEnemies(deltaTime);
         tm.updateAllTowers(deltaTime);
 
+        if (health <= 0) {
+            gameOver = true;
+        }
+
         if (initialStart) {
 
             if (wm.updateWave(wave) && em.getEnemies().isEmpty()) {
@@ -554,21 +560,46 @@ public class MyGame extends VariableFrameRateGame {
         }
         // System.out.println(cam.getLocation());
         //---------------------HUD-------------------------
-        String dispStr3 = "";
 
         Vector3f dolPos = dol.getWorldLocation();
-        dispStr2 = "X: " + String.format("%.2f", dolPos.x()) + " Y: " + String.format("%.2f", dolPos.y()) + " Z: " + String.format("%.2f", dolPos.z());
+        if (wave+1 > wm.getMaxWaves()) {
+            dispStr1 = Integer.toString(wave) + "/" + wm.getMaxWaves() + "(COMPLETE)";
+        }
+        else {
+            dispStr1 = Integer.toString(wave+1) + "/" + wm.getMaxWaves();
+            if (!initialStart || (wm.updateWave(wave) && em.getEnemies().isEmpty())) {
+                dispStr1+="(Press P or Y to start next wave)";
+            }
+        }
+        // dispStr2 = "X: " + String.format("%.2f", dolPos.x()) + " Y: " + String.format("%.2f", dolPos.y()) + " Z: " + String.format("%.2f", dolPos.z());
+        dispStr2 = "Health: " + health + " Money: " + money;
 
-        Vector3f hud1Color = new Vector3f(1, 0, 0);
-        Vector3f hud2Color = new Vector3f(1, 1, 1);
-        (engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
+        if (!gameOver) {
+            dispStr3 = "";
+        }
+        else {
+            dispStr3 = "GAME OVER";
+        }
+
+        Vector3f hud1Color = new Vector3f(0, 0, 0);
+        Vector3f hud2Color = new Vector3f(0, 0, 0);
+        Vector3f hud3Color = new Vector3f(1, 0, 0);
+
+        // (engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
         int screenBoundsX = (engine.getRenderSystem()).getBounds().width;
         int screenBoundsY = (engine.getRenderSystem()).getBounds().height;
 
-        double HUD2X = (screenBoundsX / 10) * 6.5;
-        // double HUD2Y = (screenBoundsY/10)*0.2;
 
-        (engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, (int) HUD2X, 15);
+        double HUD1X = (screenBoundsX / 10) * 0.5;
+        double HUD1Y = (screenBoundsY/10) * 0.2;
+
+        (engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, (int) HUD1X, (int) HUD1Y);
+
+
+        double HUD2X = (screenBoundsX / 10) * 8;
+        double HUD2Y = (screenBoundsY/10)*8.5;
+
+        (engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, (int) HUD2X, (int) HUD2Y);
 
         double HUD3X = (screenBoundsX / 2);
         double HUD3Y = (screenBoundsY / 2);
@@ -686,6 +717,30 @@ public class MyGame extends VariableFrameRateGame {
         return wm;
     }
 
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int h) {
+        health = h;
+    }
+
+    public void reduceHealth(int h) {
+        health -= h;
+    }
+
+    public int getMoney() {
+        return money;
+    }
+
+    public void increaseMoney(int m) {
+        money+=m;
+    }
+
+    public void setMoney(int m) {
+        money = m;
+    }
+
     public ObjShape getRockShape() {
         return sphereS;
     }
@@ -759,7 +814,8 @@ public class MyGame extends VariableFrameRateGame {
                 spawnSmallEnemy(5.0f);
                 break;
             case KeyEvent.VK_5:
-                placeTower();
+                // placeTower();
+                attemptToPlaceBasicTower(50);
                 break;
             case KeyEvent.VK_6:
                 removeTower();
@@ -826,6 +882,13 @@ public class MyGame extends VariableFrameRateGame {
         // squeakSound.setMaxDistance(10.0f);
         // squeakSound.setMinDistance(0.5f);
         // squeakSound.setRollOff(5.0f);
+    }
+
+    private void attemptToPlaceBasicTower(int cost) {
+        if (money >= cost) {
+            money-=cost;
+            placeTower();
+        }
     }
 
     private void placeTower() {

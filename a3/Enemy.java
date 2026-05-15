@@ -13,6 +13,8 @@ public class Enemy extends GameObject {
     private float speed = 1f;
     private boolean isAtEndOfPath = false;
     private int health = 3;
+    private int damageToPlayer = 5;
+    private int reward = 10;
 
     public Enemy(GameObject p, ObjShape s, TextureImage t, MyGame g) {
         super(p, s, t);
@@ -68,6 +70,22 @@ public class Enemy extends GameObject {
 
     public int getHealth() {
         return health;
+    }
+
+    public int getDamageToPlayer() {
+        return damageToPlayer;
+    }
+
+    public void setDamageToPlayer(int d) {
+        damageToPlayer = d;
+    }
+
+    public int getReward() {
+        return reward;
+    }
+
+    public void setReward(int r) {
+        reward = r;
     }
 
     public double detectDistance(org.joml.Vector3f a, org.joml.Vector3f b) {

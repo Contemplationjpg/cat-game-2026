@@ -28,7 +28,7 @@ public class Wave1 extends Wave {
 
     private boolean spawnSmallEnemyOnDelay(MyGame g, float sp) {
         if (lastSpawnTime + spawnDelay < activeTimer) {
-            System.out.println("last spawn time: " + lastSpawnTime + "\ncurrent time: " + activeTimer);
+            // System.out.println("last spawn time: " + lastSpawnTime + "\ncurrent time: " + activeTimer);
             g.spawnSmallEnemy(sp);
             lastSpawnTime = activeTimer;
             return true;
@@ -41,7 +41,7 @@ public class Wave1 extends Wave {
         activeTimer += deltaTime;
         // System.out.println(activeTimer + " this current round");
         if (activeTimer > round1Time && !hasSentRound1) {
-            System.out.println("round1");
+            // System.out.println("round1");
             if (round1EnemiesToDraw > 0) {
                 if (spawnSmallEnemyOnDelay(g, 2.0f)) {
                     round1EnemiesToDraw--;
@@ -54,7 +54,7 @@ public class Wave1 extends Wave {
 
         if (activeTimer > round2Time && !hasSentRound2) {
             if (round2EnemiesToDraw > 0) {
-                System.out.println("round2");
+                // System.out.println("round2");
                 if (spawnSmallEnemyOnDelay(g, 3.0f)) {
                     round2EnemiesToDraw--;
                     System.out.println("enemies left:" + round2EnemiesToDraw);
