@@ -727,6 +727,9 @@ public class MyGame extends VariableFrameRateGame {
 
     public void reduceHealth(int h) {
         health -= h;
+        if (health <= 0) {
+            health = 0;
+        }
     }
 
     public int getMoney() {
