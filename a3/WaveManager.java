@@ -26,7 +26,7 @@ public class WaveManager {
             // System.out.println("checking wave " + currentWave);
             return waves.get(currentWave).updateWave(game, game.getDeltaTime());
         }
-        System.out.println("wave " + currentWave + " doesn't exist");
+        // System.out.println("wave " + currentWave + " doesn't exist");
         return false;
     }
 
