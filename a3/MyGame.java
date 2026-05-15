@@ -246,7 +246,7 @@ public class MyGame extends VariableFrameRateGame {
         // build dolphin in the center of the window
         // dol = new GameObject(GameObject.root(), dolS, doltx);
         dol = new GameObject(GameObject.root(), dolS, null);
-        // cat = new GameObject(GameObject.root(), catS, cattx);
+        // bomberCat = new GameObject(GameObject.root(), bomberCatS, bomberCattx);
         initialTranslation = (new Matrix4f()).translation(0, -25, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
@@ -256,6 +256,12 @@ public class MyGame extends VariableFrameRateGame {
         // initialScale = (new Matrix4f()).scaling(0.5f);
         // cat.setLocalTranslation(initialTranslation);
         // cat.setLocalScale(initialScale);
+        initialTranslation = (new Matrix4f()).translation(0, 10, 0);
+        initialScale = (new Matrix4f()).scaling(0.5f);
+
+        //bomberCat.setLocalTranslation(initialTranslation);
+        //bomberCat.setLocalScale(initialScale);
+
         // plane = new GameObject(GameObject.root(), planeS, gas);
         // Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
         // Matrix4f initTransPlane = (new Matrix4f()).translation(0, -2, 0);
@@ -270,7 +276,7 @@ public class MyGame extends VariableFrameRateGame {
         terr.getRenderStates().setTiling(1);
         terr.getRenderStates().setTileFactor(64);
 
-        cursor = new GameObject(GameObject.root(), cursorS, cattx);
+        cursor = new GameObject(GameObject.root(), cursorS, cursortx);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
         cursor.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(0.5f);
