@@ -12,8 +12,8 @@ import org.joml.Quaternionf;
 public class BasicTower extends TowerType {
 
     private Enemy target = null;
-    private double range = 20f;
-    private final double projDelay = 1.5;
+    private double range = 25f;
+    private final double projDelay = 1f;
     private final double pickupDelay = 5.0;
     private final float projStrength = 100.0f;
     private double attackTimer;

@@ -82,6 +82,7 @@ public class MyGame extends VariableFrameRateGame {
     private CursorManager cm;
     private EnemyManager em;
     private TowerManager tm;
+    private WaveManager wm;
 
     private Camera cam;
     private Viewport camVp;
@@ -113,6 +114,15 @@ public class MyGame extends VariableFrameRateGame {
     private IAudioManager am; // sound
     private AudioResource deathSo;
 
+//------------------STUFF FOR "THE GAME"--------------
+    private int money = 0;
+    private int wave = 0;
+
+    private boolean initialStart = false;
+    private boolean setToProgress = false;
+    private boolean autoProgress = false;
+
+//------------------------------------------------------
     public MyGame(String serverAddress, int serverPort, String protocol) {
         super();
         this.serverAddress = serverAddress;
@@ -224,7 +234,7 @@ public class MyGame extends VariableFrameRateGame {
         // build dolphin in the center of the window
         // dol = new GameObject(GameObject.root(), dolS, doltx);
         dol = new GameObject(GameObject.root(), dolS, null);
-        initialTranslation = (new Matrix4f()).translation(0, -15, 0);
+        initialTranslation = (new Matrix4f()).translation(0, -25, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
@@ -350,6 +360,7 @@ public class MyGame extends VariableFrameRateGame {
         cm = new CursorManager(this);
         em = new EnemyManager(this);
         tm = new TowerManager(this);
+        wm = new WaveManager(this);
         setupNetworking();
 
         lastFrameTime = System.currentTimeMillis();
@@ -399,6 +410,17 @@ public class MyGame extends VariableFrameRateGame {
         setEarParameters();
         // squeakSound.play();
         // squeakSound.stop();
+
+        //-----------------initialize wave manager ----------------------------
+        ArrayList<Wave> waves = new ArrayList<Wave>(); //initialize waves list
+        //Make new waves
+        Wave1 wave1 = new Wave1();
+        Wave1 wave2 = new Wave1();
+        //add waves to ArrayList
+        waves.add(wave1);
+        waves.add(wave2);
+
+        wm.initializeWaves(waves);
     }
 
     public void setEarParameters() {
@@ -492,6 +514,17 @@ public class MyGame extends VariableFrameRateGame {
         cm.updateCursor();
         em.updateAllEnemies(deltaTime);
         tm.updateAllTowers(deltaTime);
+
+        if (initialStart) {
+
+            if (wm.updateWave(wave) && em.getEnemies().isEmpty()) {
+                if (setToProgress || autoProgress) {
+                    wave += 1;
+                    setToProgress = false;
+                }
+            }
+            setToProgress = false;
+        }
 
         // System.out.println(deltaTime);
         //-----------------update inputs-------------
@@ -632,6 +665,10 @@ public class MyGame extends VariableFrameRateGame {
         return am;
     }
 
+    public WaveManager getWaveManager() {
+        return wm;
+    }
+
     public ObjShape getRockShape() {
         return sphereS;
     }
@@ -699,10 +736,10 @@ public class MyGame extends VariableFrameRateGame {
                 isOrbitMode = !isOrbitMode;
                 break;
             case KeyEvent.VK_2:
-                spawnEnemy(2.0f);
+                spawnSmallEnemy(2.0f);
                 break;
             case KeyEvent.VK_3:
-                spawnEnemy(5.0f);
+                spawnSmallEnemy(5.0f);
                 break;
             case KeyEvent.VK_5:
                 placeTower();
@@ -719,12 +756,16 @@ public class MyGame extends VariableFrameRateGame {
             case KeyEvent.VK_R:
                 dolS.stopAnimation();
                 break;
+            case KeyEvent.VK_P:
+                setToProgress = true;
+                initialStart = true;
+                break;
 
         }
         super.keyPressed(e);
     }
 
-    private void spawnEnemy(float sp) {
+    public void spawnSmallEnemy(float sp) {
         //create enemy graphics  
         Enemy testEnemy = new Enemy(GameObject.root(), dolS, doltx, this, sp);
         em.addEnemy(testEnemy);
