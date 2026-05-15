@@ -60,6 +60,11 @@ public class MyGame extends VariableFrameRateGame {
     private AnimatedShape dolS;
     private TextureImage doltx;
 
+    private GameObject cat;
+    // private ObjShape catS;
+    private AnimatedShape catS;
+    private TextureImage cattx;
+
     private GameObject ghost;
     private ObjShape ghostS;
     private TextureImage ghostT;
@@ -198,6 +203,9 @@ public class MyGame extends VariableFrameRateGame {
         dolS = new AnimatedShape("rat.rkm", "rat.rks");
         dolS.loadAnimation("WAG", "ratTailWag.rka");
 
+        catS = new AnimatedShape("basicCat.rkm", "basicCat.rks");
+        catS.loadAnimation("arm", "basicCatArm.rka");
+
         tableS = new ImportedModel("table.obj");
 
         sphereS = new Sphere();
@@ -218,6 +226,7 @@ public class MyGame extends VariableFrameRateGame {
         purplebrick = new TextureImage("purplebrick.jpg");
         grass = new TextureImage("grass.png");
         grassHM = new TextureImage("grassHM.png");
+        cattx = new TextureImage("fullCat.png");
     }
 
     @Override
@@ -234,10 +243,17 @@ public class MyGame extends VariableFrameRateGame {
         // build dolphin in the center of the window
         // dol = new GameObject(GameObject.root(), dolS, doltx);
         dol = new GameObject(GameObject.root(), dolS, null);
+        cat = new GameObject(GameObject.root(), catS, cattx);
         initialTranslation = (new Matrix4f()).translation(0, -25, 0);
         initialScale = (new Matrix4f()).scaling(3.0f);
         dol.setLocalTranslation(initialTranslation);
         dol.setLocalScale(initialScale);
+
+        initialTranslation = (new Matrix4f()).translation(0, 10, 0);
+        initialScale = (new Matrix4f()).scaling(0.5f);
+
+        cat.setLocalTranslation(initialTranslation);
+        cat.setLocalScale(initialScale);
 
         // plane = new GameObject(GameObject.root(), planeS, gas);
         // Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
@@ -253,7 +269,7 @@ public class MyGame extends VariableFrameRateGame {
         terr.getRenderStates().setTiling(10);
         terr.getRenderStates().setTileFactor(1);
 
-        cursor = new GameObject(GameObject.root(), cursorS, gas);
+        cursor = new GameObject(GameObject.root(), cursorS, cattx);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
         cursor.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(0.5f);
@@ -592,6 +608,7 @@ public class MyGame extends VariableFrameRateGame {
         pe.detectCollisions();
 
         dolS.updateAnimation();
+        catS.updateAnimation();
 
     }
 
@@ -748,13 +765,17 @@ public class MyGame extends VariableFrameRateGame {
                 removeTower();
                 break;
 
-            case KeyEvent.VK_E:
-                dolS.stopAnimation();
-                dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
-                break;
-
             case KeyEvent.VK_R:
                 dolS.stopAnimation();
+                catS.stopAnimation();
+                dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
+                catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
+
+                break;
+
+            case KeyEvent.VK_T:
+                dolS.stopAnimation();
+                catS.stopAnimation();
                 break;
             case KeyEvent.VK_P:
                 setToProgress = true;
@@ -812,7 +833,7 @@ public class MyGame extends VariableFrameRateGame {
 
         if (targetTile.getTowerable()) {//if tile is towerable (placable and not occupied)
             Tower testTower = new Tower(this); //make new tower
-            TowerType t = new BasicTower(this, testTower, "test", dolS, gas); //make new TowerType
+            TowerType t = new BasicTower(this, testTower, "test", catS, cattx); //make new TowerType
             testTower.setTowerType(t); //give the TowerType to the Tower
             targetTile.setTower(testTower); //assign the tower to the tile
             testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering(); //hide the table
