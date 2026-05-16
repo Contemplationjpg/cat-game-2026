@@ -937,7 +937,7 @@ public class MyGame extends VariableFrameRateGame {
 
         if (targetTile.getTowerable()) {//if tile is towerable (placable and not occupied)
             Tower testTower = new Tower(this); //make new tower
-            TowerType t = new BasicTower(this, testTower, "test", bomberCatS, bomberCattx); //make new TowerType
+            TowerType t = new BomberTower(this, testTower, "test", bomberCatS, bomberCattx); //make new TowerType
             testTower.setTowerType(t); //give the TowerType to the Tower
             targetTile.setTower(testTower); //assign the tower to the tile
             testTables[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getRenderStates().disableRendering(); //hide the table

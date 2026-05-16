@@ -16,8 +16,11 @@ public class TowerManager {
 
     private ArrayList<Tower> towers = new ArrayList<Tower>();
     private ArrayList<PhysicsObject> rocks = new ArrayList<PhysicsObject>();
+    private ArrayList<PhysicsObject> bombs = new ArrayList<PhysicsObject>();
+
 
     public void updateAllTowers(double deltaTime) {
+        // System.out.println("TowerManager: Bombs " + bombs.toString());
         if (towers.isEmpty()) {
             return;
         }
@@ -56,6 +59,23 @@ public class TowerManager {
 
     public Boolean checkForRock(PhysicsObject r) {
         return rocks.contains(r);
+    }
+
+    public void addBomb(PhysicsObject r) {
+        bombs.add(r);
+    }
+
+    public void removeBomb(PhysicsObject r) {
+        bombs.remove(r);
+        game.getEngine().getSceneGraph().removePhysicsObject(r);
+    }
+
+    public ArrayList<PhysicsObject> getBombs() {
+        return bombs;
+    }
+
+    public Boolean checkForBomb(PhysicsObject r) {
+        return bombs.contains(r);
     }
 
 }
