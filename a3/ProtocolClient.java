@@ -2,11 +2,11 @@ package a3;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.UUID;
+import java.util.*;
 import tage.*;
 import tage.GhostAvatar.*;
 import tage.networking.client.GameConnectionClient;
-import org.joml.Vector3f;
+import org.joml.*;
 // import org.joml.Vector3;
 
 public class ProtocolClient extends GameConnectionClient {
@@ -29,12 +29,13 @@ public class ProtocolClient extends GameConnectionClient {
         // System.out.println("RECEIVED PACKET: " + msg);
         String strMessage = (String) msg;
         String[] msgTokens = strMessage.split(",");
+        System.out.println("RECEIVED PACKET: " + Arrays.toString(msgTokens));
         if (msgTokens.length > 0) {
             if (msgTokens[0].compareTo("join") == 0) // receive "join"
             { // format: join, success or join, failure
                 if (msgTokens[1].compareTo("success") == 0) {
                     game.setIsConnected(true);
-                    sendCreateMessage(game.getPlayerPosition());
+                    sendCreateMessage(game.getCursorManager().getCursorPos());
                     System.out.println("CONNECTED");
 
                 }
@@ -50,10 +51,10 @@ public class ProtocolClient extends GameConnectionClient {
             if ((msgTokens[0].compareTo("dsfr") == 0) // receive "dsfr"
                     || (msgTokens[0].compareTo("create") == 0)) { // format: create, remoteId, x,y,z or dsfr, remoteId, x,y,z
                 UUID ghostID = UUID.fromString(msgTokens[1]);
-                Vector3f ghostPosition = new Vector3f(
-                        Float.parseFloat(msgTokens[2]),
-                        Float.parseFloat(msgTokens[3]),
-                        Float.parseFloat(msgTokens[4]));
+                int[] ghostPosition = {
+                        Integer.parseInt(msgTokens[2]),
+                        Integer.parseInt(msgTokens[3])
+                    };
                 try {
                     if (ghostManager == null) {
                         System.out.println("ghost manager null");
@@ -66,6 +67,7 @@ public class ProtocolClient extends GameConnectionClient {
                     e.printStackTrace();
                     System.out.println("error creating ghost avatar");
                 }
+
             }
             if (msgTokens[0].compareTo("wsds") == 0) // rec. "wants…"
             {
@@ -73,7 +75,9 @@ public class ProtocolClient extends GameConnectionClient {
             if (msgTokens[0].compareTo("move") == 0) // rec. "move..."
             {
                 // System.out.print("SUCCESSFULLY SENT SERVER POSITION: " + msgTokens[1] + ", " + msgTokens[2] + ", " + msgTokens[3]);
-                // System.out.println("SUCCESSFULLY SENT SERVER POSITION");
+                System.out.println("RECEIVED MOVE FROM " + msgTokens[1]);
+                int[] pos = {Integer.parseInt(msgTokens[2]), Integer.parseInt(msgTokens[3])};
+                game.getGhostManager().updateGhostAvatar(UUID.fromString(msgTokens[1]), pos);
             }
         }
     }
@@ -87,11 +91,11 @@ public class ProtocolClient extends GameConnectionClient {
         }
     }
 
-    public void sendCreateMessage(Vector3f pos) { // format: (create, localId, x,y,z)
+    public void sendCreateMessage(int[] pos) { // format: (create, localId, x,y,z)
         try {
             System.out.println("SEND CREATE");
             String message = new String("create," + id.toString());
-            message += "," + pos.x + "," + pos.y + "," + pos.z;
+            message += "," + pos[0] + "," + pos[1];
             sendPacket(message);
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,13 +114,15 @@ public class ProtocolClient extends GameConnectionClient {
 
     }
 
-    public void sendMoveMessage(Vector3f pos) {
+    public void sendMoveMessage(int[] pos) { //sends cursor position on grid
         try {
             String message = new String("move," + id.toString());
-            message += "," + pos.x + "," + pos.y + "," + pos.z;
+            message += "," + pos[0] + "," + pos[1];
             sendPacket(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 }
