@@ -98,6 +98,7 @@ public class MyGame extends VariableFrameRateGame {
     String dispStr1 = "";
     String dispStr2 = "";
     String dispStr3 = "";
+    String dispStr4 = "";
 
     private GhostManager gm;
     private String serverAddress = "localhost";
@@ -208,8 +209,8 @@ public class MyGame extends VariableFrameRateGame {
         //dolS = new AnimatedShape("rat.rkm", "rat.rks");
         //dolS.loadAnimation("WAG", "ratTailWag.rka");
 
-        catS = new AnimatedShape("basicCat.rkm", "basicCat.rks");
-        catS.loadAnimation("arm", "basicCatArm.rka");
+        catS = new AnimatedShape("basicCat2.rkm", "basicCat2.rks");
+        catS.loadAnimation("arm", "basicCatArm2.rka");
 
         tableS = new ImportedModel("table.obj");
 
@@ -452,6 +453,9 @@ public class MyGame extends VariableFrameRateGame {
         waves.add(wave2);
 
         wm.initializeWaves(waves);
+
+        // starts animation
+        // catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
     }
 
     public void setEarParameters() {
@@ -581,11 +585,12 @@ public class MyGame extends VariableFrameRateGame {
         else {
             dispStr1 = Integer.toString(wave+1) + "/" + wm.getMaxWaves();
             if (!initialStart || (wm.updateWave(wave) && em.getEnemies().isEmpty())) {
-                dispStr1+="(Press P or Y to start next wave)";
+                dispStr1 += (" (Press P to start next wave, 1 to place basic tower, 2 to place artillery tower, 6 to delete tower, 0 to pan around area)");
             }
         }
         // dispStr2 = "X: " + String.format("%.2f", dolPos.x()) + " Y: " + String.format("%.2f", dolPos.y()) + " Z: " + String.format("%.2f", dolPos.z());
         dispStr2 = "Health: " + health + " Money: " + money;
+        // dispStr4 = "Press 1 to place basic tower, 2 to place artillery tower, 6 to delete tower, 0 to pan around area";
 
         if (!gameOver) {
             dispStr3 = "";
@@ -823,35 +828,31 @@ public class MyGame extends VariableFrameRateGame {
             case KeyEvent.VK_0:
                 isOrbitMode = !isOrbitMode;
                 break;
-            case KeyEvent.VK_2:
-                spawnSmallEnemy(2.0f);
-                break;
-            case KeyEvent.VK_3:
-                spawnSmallEnemy(5.0f);
-                break;
-            case KeyEvent.VK_5:
-                // placeTower();
+            case KeyEvent.VK_1:
                 attemptToPlaceBasicTower(50);
                 break;
-            case KeyEvent.VK_8:
+            case KeyEvent.VK_2:
                 attemptToPlaceBomberTower(100);
                 break;
+            // case KeyEvent.VK_3:
+            //     spawnSmallEnemy(5.0f);
+            //     break;
             case KeyEvent.VK_6:
                 removeTower();
                 break;
 
-            case KeyEvent.VK_R:
-                //dolS.stopAnimation();
-                catS.stopAnimation();
-                //dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
-                catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
+            // case KeyEvent.VK_R:
+            //     //dolS.stopAnimation();
+            //     catS.stopAnimation();
+            //     //dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
+            //     catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
+            //     break;
 
-                break;
-
-            case KeyEvent.VK_T:
-                //dolS.stopAnimation();
-                catS.stopAnimation();
-                break;
+            // case KeyEvent.VK_T:
+            //     //dolS.stopAnimation();
+            //     catS.stopAnimation();
+            //     catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.NONE, 0);
+            //     break;
             case KeyEvent.VK_P:
                 setToProgress = true;
                 initialStart = true;
