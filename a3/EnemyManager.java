@@ -27,10 +27,16 @@ public class EnemyManager {
             // System.out.println("updating enemy " + i);
             HashSet<PhysicsObject> colls = enemyPs.get(i).getNewlyCollidedSet();
             // System.out.println("enemy " + i + " collided set:" + colls.toString());
-            if (colls.size() > 0) {
+            if (!colls.isEmpty()) {
                 for (int j = 0; j < game.getTowerManager().getRocks().size(); j++) {
                     if (colls.contains(game.getTowerManager().getRocks().get(j))) {
                         enemies.get(i).takeDamage(1);
+                        // System.out.println("Health: " + enemies.get(i).getHealth());
+                    }
+                }
+                for (int j = 0; j < game.getTowerManager().getBombs().size(); j++) {
+                    if (colls.contains(game.getTowerManager().getBombs().get(j))) {
+                        enemies.get(i).takeDamage(5);
                         // System.out.println("Health: " + enemies.get(i).getHealth());
                     }
                 }

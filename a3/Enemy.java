@@ -14,7 +14,7 @@ public class Enemy extends GameObject {
     private boolean isAtEndOfPath = false;
     private int health = 3;
     private int damageToPlayer = 5;
-    private int reward = 10;
+    private int reward = 25;
 
     public Enemy(GameObject p, ObjShape s, TextureImage t, MyGame g) {
         super(p, s, t);
