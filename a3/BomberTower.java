@@ -8,6 +8,8 @@ import tage.TextureImage;
 import tage.shapes.ImportedModel;
 import java.util.*;
 import org.joml.Quaternionf;
+import tage.shapes.AnimatedShape;
+import tage.shapes.AnimatedShape;
 
 public class BomberTower extends TowerType {
 
@@ -92,6 +94,7 @@ public class BomberTower extends TowerType {
             return;
         }
         tower.lookAt(target);
+        tower.yaw(-90f);
         //create projectile if not created yet
         createNewBomb();
         //throw projectile on timer (give attack cooldown)

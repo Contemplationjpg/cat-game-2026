@@ -1,6 +1,5 @@
 package a3;
 
-
 import org.joml.*;
 
 import tage.*;
@@ -46,6 +45,8 @@ public class MyGame extends VariableFrameRateGame {
     private static Engine engine;
     private static PhysicsEngine pe;
 
+    private Boolean isServer = false;
+
     private double lastFrameTime, currFrameTime, deltaTime;
 
     private boolean isOrbitMode = false;
@@ -80,11 +81,16 @@ public class MyGame extends VariableFrameRateGame {
     private ObjShape tableS;
     private GameObject testTables[][];
 
-    private GameObject cursor;
-    private ObjShape cursorS, rockS;
-    private TextureImage cursortx;
+    private GameObject cursor1;
+    private GameObject cursor2;
+    private ObjShape cursorS1;
+    private ObjShape cursorS2;
+    private TextureImage cursortx1;
+    private TextureImage cursortx2;
+    private ObjShape rockS;
 
-    private Light lightP1, lightP2, lightP3, lightH;
+    private Light lightP1;
+    private Light[][] gridLights;
 
     private InputManager im;
     private CursorManager cm;
@@ -134,19 +140,26 @@ public class MyGame extends VariableFrameRateGame {
     private boolean autoProgress = false;
 
 //------------------------------------------------------
-    public MyGame(String serverAddress, int serverPort, String protocol) {
+    public MyGame(String serverAddress, int serverPort) {
         super();
+        System.out.println("Connecting as client");
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
-        if (protocol.toUpperCase().compareTo("TCP") == 0) {
-            this.serverProtocol = ProtocolType.TCP;
-        } else {
-            this.serverProtocol = ProtocolType.UDP;
-        }
+        this.serverProtocol = ProtocolType.UDP;
+        isServer = false;
+    }
+
+    public MyGame(int serverPort) {
+        super();
+        System.out.println("Hosting a server");
+        NetworkingServer app = new NetworkingServer(serverPort);
+        isServer = true;
     }
 
     public MyGame() {
         super();
+        System.out.println("Running singleplayer");
+        isServer = true;
     }
 
     @Override
@@ -156,8 +169,20 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public static void main(String[] args) {
-        MyGame game = new MyGame();
-        // MyGame game = new MyGame(args[0], Integer.parseInt(args[1]), args[2]);
+        // if (args.length > 1) {
+        //     // System.out.println(Integer.parseInt(args[0]) + ", " + args[1]);
+        //     NetworkingServer app
+        //             = new NetworkingServer(Integer.parseInt(args[0]), args[1]);
+        // }
+        // MyGame game = new MyGame();
+        MyGame game;
+        if (args.length == 1) {
+            game = new MyGame(Integer.parseInt(args[0]));
+        } else if (args.length > 1) {
+            game = new MyGame(args[0], Integer.parseInt(args[1]));
+        } else {
+            game = new MyGame();
+        }
         engine = new Engine(game);
         engine.initializeSystem();
         game.buildGame();
@@ -218,7 +243,9 @@ public class MyGame extends VariableFrameRateGame {
 
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
 
-        cursorS = new ImportedModel("cursor.obj");
+        cursorS1 = new ImportedModel("cursor.obj");
+        cursorS2 = new ImportedModel("cursor.obj");
+
         rockS = new ImportedModel("rock.obj");
         bomberCatS = new ImportedModel("artilleryCat.obj");
     }
@@ -234,7 +261,8 @@ public class MyGame extends VariableFrameRateGame {
         grass = new TextureImage("grass.png");
         grassHM = new TextureImage("grassHM.png");
         cattx = new TextureImage("fullCat.png");
-        cursortx = new TextureImage("cursorTexture.png");
+        cursortx1 = new TextureImage("cursorTextureP1.png");
+        cursortx2 = new TextureImage("cursorTextureP2.png");
         bomberCattx = new TextureImage("bomberCat.png");
         rocktx = new TextureImage("stone.png");
     }
@@ -268,7 +296,6 @@ public class MyGame extends VariableFrameRateGame {
 
         //bomberCat.setLocalTranslation(initialTranslation);
         //bomberCat.setLocalScale(initialScale);
-
         // plane = new GameObject(GameObject.root(), planeS, gas);
         // Matrix4f initScalePlane = (new Matrix4f()).scale(50f);
         // Matrix4f initTransPlane = (new Matrix4f()).translation(0, -2, 0);
@@ -283,12 +310,21 @@ public class MyGame extends VariableFrameRateGame {
         terr.getRenderStates().setTiling(1);
         terr.getRenderStates().setTileFactor(64);
 
-        cursor = new GameObject(GameObject.root(), cursorS, cursortx);
+        if (isServer) {
+        cursor1 = new GameObject(GameObject.root(), cursorS1, cursortx1);
         initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
-        cursor.setLocalTranslation(initialTranslation);
+        cursor1.setLocalTranslation(initialTranslation);
         initialScale = (new Matrix4f()).scaling(0.5f);
-        cursor.setLocalScale(initialScale);
-        cursor.yaw(-45f);
+        cursor1.setLocalScale(initialScale);
+        cursor1.yaw(-45f);
+        } else {
+        cursor2 = new GameObject(GameObject.root(), cursorS2, cursortx2);
+        initialTranslation = (new Matrix4f()).translation(0f, 0f, 0f);
+        cursor2.setLocalTranslation(initialTranslation);
+        initialScale = (new Matrix4f()).scaling(0.5f);
+        cursor2.setLocalScale(initialScale);
+        cursor2.yaw(-45f);
+        }
 
         //------------------- setting up grid of tiles ----------
         //read board
@@ -372,17 +408,22 @@ public class MyGame extends VariableFrameRateGame {
     public void initializeLights() {
         Light.setGlobalAmbient(0.5f, 0.5f, 0.5f);
         lightP1 = new Light();
-        lightP1.setLocation(new Vector3f(0f, 10.0f, -10.0f));
+        lightP1.setLocation(new Vector3f(50f, 10.0f, 0f));
         (engine.getSceneGraph()).addLight(lightP1);
-        lightP2 = new Light();
-        lightP2.setLocation(new Vector3f(-8f, 10f, 20f));
-        (engine.getSceneGraph()).addLight(lightP2);
-        lightP3 = new Light();
-        lightP3.setLocation(new Vector3f(12f, 10f, -5.0f));
-        (engine.getSceneGraph()).addLight(lightP3);
-        lightH = new Light();
-        lightH.setLocation(new Vector3f(0f, 10f, 5.0f));
-        (engine.getSceneGraph()).addLight(lightH);
+        gridLights = new Light[gridWidth][gridHeight];
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+               if (grid[i][j].getTileType().getName().equals("unplacable")) {
+                Light newlight = new Light();
+                Vector3f tempPos = grid[i][j].getPosition();
+                tempPos.y = 15f;
+                newlight.setLocation(tempPos);
+                newlight.setDiffuse(1, 0, 0);
+                (engine.getSceneGraph()).addLight(newlight);
+                gridLights[i][j] = newlight;
+               }
+            }
+        }
     }
 
     @Override
@@ -448,9 +489,13 @@ public class MyGame extends VariableFrameRateGame {
         //Make new waves
         Wave1 wave1 = new Wave1();
         Wave1 wave2 = new Wave1();
+        Wave1 wave3 = new Wave1();
+        Wave1 wave4 = new Wave1();
         //add waves to ArrayList
         waves.add(wave1);
         waves.add(wave2);
+        waves.add(wave3);
+        waves.add(wave4);
 
         wm.initializeWaves(waves);
 
@@ -565,6 +610,7 @@ public class MyGame extends VariableFrameRateGame {
             setToProgress = false;
         }
 
+        //---------------update ghost manager------------------
         // System.out.println(deltaTime);
         //-----------------update inputs-------------
         im.update((float) deltaTime);
@@ -579,11 +625,10 @@ public class MyGame extends VariableFrameRateGame {
         //---------------------HUD-------------------------
 
         Vector3f dolPos = dol.getWorldLocation();
-        if (wave+1 > wm.getMaxWaves()) {
+        if (wave + 1 > wm.getMaxWaves()) {
             dispStr1 = Integer.toString(wave) + "/" + wm.getMaxWaves() + "(COMPLETE)";
-        }
-        else {
-            dispStr1 = Integer.toString(wave+1) + "/" + wm.getMaxWaves();
+        } else {
+            dispStr1 = Integer.toString(wave + 1) + "/" + wm.getMaxWaves();
             if (!initialStart || (wm.updateWave(wave) && em.getEnemies().isEmpty())) {
                 dispStr1 += (" (Press P to start next wave, 1 to place basic tower, 2 to place artillery tower, 6 to delete tower, 0 to pan around area)");
             }
@@ -594,8 +639,7 @@ public class MyGame extends VariableFrameRateGame {
 
         if (!gameOver) {
             dispStr3 = "";
-        }
-        else {
+        } else {
             dispStr3 = "GAME OVER";
         }
 
@@ -607,15 +651,13 @@ public class MyGame extends VariableFrameRateGame {
         int screenBoundsX = (engine.getRenderSystem()).getBounds().width;
         int screenBoundsY = (engine.getRenderSystem()).getBounds().height;
 
-
         double HUD1X = (screenBoundsX / 10) * 0.5;
-        double HUD1Y = (screenBoundsY/10) * 0.2;
+        double HUD1Y = (screenBoundsY / 10) * 0.2;
 
         (engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, (int) HUD1X, (int) HUD1Y);
 
-
         double HUD2X = (screenBoundsX / 10) * 8;
-        double HUD2Y = (screenBoundsY/10)*8.5;
+        double HUD2Y = (screenBoundsY / 10) * 8.5;
 
         (engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, (int) HUD2X, (int) HUD2Y);
 
@@ -624,7 +666,7 @@ public class MyGame extends VariableFrameRateGame {
         (engine.getHUDmanager()).setHUD3(dispStr3, hud2Color, (int) HUD3X, (int) HUD3Y);
 
         processNetworking((float) currFrameTime);
-        protClient.sendMoveMessage(new Vector3f(dolPos));
+        protClient.sendMoveMessage(cm.getCursorPos().clone());
 
         // -----------update sound--------
         if (!em.getDeathSounds().isEmpty()) {
@@ -696,7 +738,11 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public GameObject getCursorObj() {
-        return cursor;
+        if (isServer) {
+            return cursor1;
+        } else {
+            return cursor2;
+        }
     }
 
     public CursorManager getCursorManager() {
@@ -708,11 +754,11 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public ObjShape getGhostShape() {// return ghostS;
-        return dolS;
+        return cursorS2;
     }
 
     public TextureImage getGhostTexture() {// return ghostT;
-        return doltx;
+        return cursortx2;
     }
 
     public GhostManager getGhostManager() {
@@ -755,7 +801,7 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public void increaseMoney(int m) {
-        money+=m;
+        money += m;
     }
 
     public void setMoney(int m) {
@@ -763,11 +809,11 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public ObjShape getRockShape() {
-        return sphereS;
+        return rockS;
     }
 
     public TextureImage getRockTexture() {
-        return gas;
+        return rocktx;
     }
 
     public Vector3f getPlayerPosition() {
@@ -818,7 +864,7 @@ public class MyGame extends VariableFrameRateGame {
     public void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_7:
-                protClient.sendMoveMessage(dol.getWorldLocation());
+                protClient.sendMoveMessage(cm.getCursorPos());
                 break;
             case KeyEvent.VK_9:
                 if (protClient != null && isClientConnected == true) {
@@ -905,15 +951,15 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     private void attemptToPlaceBasicTower(int cost) {
-        if (money >= cost) {
-            money-=cost;
+        if (money >= cost && grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getTowerable()) {
+            money -= cost;
             placeTower();
         }
     }
 
     private void attemptToPlaceBomberTower(int cost) {
-        if (money >= cost) {
-            money-=cost;
+        if (money >= cost && grid[cm.getCursorPos()[0]][cm.getCursorPos()[1]].getTowerable()) {
+            money -= cost;
             placeBomberTower();
         }
     }

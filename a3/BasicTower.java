@@ -8,6 +8,7 @@ import tage.TextureImage;
 import tage.shapes.ImportedModel;
 import java.util.*;
 import org.joml.Quaternionf;
+import tage.shapes.AnimatedShape;
 
 public class BasicTower extends TowerType {
 
@@ -92,6 +93,7 @@ public class BasicTower extends TowerType {
             return;
         }
         tower.lookAt(target);
+        tower.yaw(-90f);
         //create projectile if not created yet
         createNewRock();
         //throw projectile on timer (give attack cooldown)
@@ -114,6 +116,7 @@ public class BasicTower extends TowerType {
             projectileP.setLinearVelocity(throwingVelo);
             attackTimer = projDelay;
             pickupTimer = pickupDelay;
+            ((AnimatedShape) model).playAnimation("arm", 0.5f, AnimatedShape.EndType.STOP, 0);
         }
 
     }

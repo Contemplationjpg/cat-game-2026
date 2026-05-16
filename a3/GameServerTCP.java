@@ -16,7 +16,7 @@ public class GameServerTCP extends GameConnectionServer<UUID> {
     @Override
     public void processPacket(Object o, InetAddress senderIP, int sndPort) {
         String message = (String) o;
-        System.out.println("PACKET RECEIVED FROM CLIENT: " + message);
+        // System.out.println("PACKET RECEIVED FROM CLIENT: " + message);
         String[] msgTokens = message.split(",");
         if (msgTokens.length > 0) {
             // case where server receives a JOIN message
@@ -57,7 +57,7 @@ public class GameServerTCP extends GameConnectionServer<UUID> {
 
         // case where server receives a MOVE message
         if (msgTokens[0].compareTo("move") == 0) {
-            System.out.print("MOVE RECEIVED FROM " + senderIP + ": " + msgTokens[1]);
+            // System.out.print("MOVE RECEIVED FROM " + senderIP + ": " + msgTokens[1]);
         }
 
     }

@@ -2,7 +2,7 @@ package a3;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.UUID;
+import java.util.*;
 import tage.networking.server.GameConnectionServer;
 import tage.networking.server.IClientInfo;
 
@@ -18,6 +18,7 @@ public class GameServerUDP extends GameConnectionServer<UUID> {
         String message = (String) o;
         // System.out.println("PACKET RECEIVED FROM CLIENT: " + message);
         String[] msgTokens = message.split(",");
+        // System.out.println("RECEIVED PACKET: " + Arrays.toString(msgTokens));
         if (msgTokens.length > 0) {
             // case where server receives a JOIN message
             // format: join,localid
@@ -39,7 +40,7 @@ public class GameServerUDP extends GameConnectionServer<UUID> {
         if (msgTokens[0].compareTo("create") == 0) {
             System.out.println("RECEIVED CREATE");
             UUID clientID = UUID.fromString(msgTokens[1]);
-            String[] pos = {msgTokens[2], msgTokens[3], msgTokens[4]};
+            String[] pos = {msgTokens[2], msgTokens[3]};
             sendCreateMessages(clientID, pos);
             sendWantsDetailsMessages(clientID);
         }
@@ -60,9 +61,9 @@ public class GameServerUDP extends GameConnectionServer<UUID> {
         // case where server receives a MOVE message
         if (msgTokens[0].compareTo("move") == 0) {
             UUID clientID = UUID.fromString(msgTokens[1]);
-            String[] pos = {msgTokens[2], msgTokens[3], msgTokens[4]};
-            // System.out.println(pos.toString());
-            System.out.println("MOVE RECEIVED FROM " + clientID + ": " + pos[0] + ", " + pos[1] + ", " + pos[2]);
+            String[] pos = {msgTokens[2], msgTokens[3]};
+            // System.out.println(Arrays.toString(pos));
+            // System.out.println("MOVE RECEIVED FROM " + clientID + ": " + pos[0] + ", " + pos[1]);
             sendMoveMessage(clientID, pos);
         }
 
@@ -90,7 +91,6 @@ public class GameServerUDP extends GameConnectionServer<UUID> {
             String message = "create," + clientID.toString();
             message += "," + position[0];
             message += "," + position[1];
-            message += "," + position[2];
             forwardPacketToAll(message, clientID);
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,8 +109,10 @@ public class GameServerUDP extends GameConnectionServer<UUID> {
         // System.out.println(clientID + ", " + position);
         // System.out.println("SENDING MOVE MESSAGE");
         try {
-            sendPacket("move," + position[0] + "," + position[1] + "," + position[2], clientID);
-            // forwardPacketToAll("move," + position[0] + "," + position[1] + "," + position[2], clientID);
+            // sendPacket("move," + position[0] + "," + position[1], clientID);
+            String message = "move," + clientID + "," + position[0] + "," + position[1];
+            // System.out.println("SENDING PACKET " + message);
+            forwardPacketToAll(message, clientID);
         }
         catch (IOException e) {
             System.out.print("failed to send move to " + clientID);
