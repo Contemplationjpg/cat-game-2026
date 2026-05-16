@@ -14,8 +14,7 @@ import java.util.Vector;
 // import tage.rml.Vector3;
 // import tage.rml.Vector3f;
 // import org.joml.Vector3D;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.*;
 import tage.ObjShape;
 
 public class GhostManager {
@@ -27,12 +26,17 @@ public class GhostManager {
         game = (MyGame) vfrg;
     }
 
-    public void createGhost(UUID id, Vector3f p) throws IOException {
+    public void createGhost(UUID id, int[] p) throws IOException {
+        Vector3f pos = new Vector3f(game.getGrid()[p[0]][p[1]].getPosition());
+        pos.x += (game.getTileWidth()/3f);
+        pos.y = 3f;
+        pos.z -= (game.getTileHeight()/3);
         ObjShape s = game.getGhostShape();
         TextureImage t = game.getGhostTexture();
-        GhostAvatar newAvatar = new GhostAvatar(id, s, t, p);
+        GhostAvatar newAvatar = new GhostAvatar(id, s, t, pos);
         Matrix4f initialScale = (new Matrix4f()).scaling(0.5f);
         newAvatar.setLocalScale(initialScale);
+        newAvatar.yaw(-90);
         ghostAvs.add(newAvatar);
     }
 
@@ -58,10 +62,14 @@ public class GhostManager {
         return null;
     }
 
-    public void updateGhostAvatar(UUID id, Vector3f position) {
+    public void updateGhostAvatar(UUID id, int[] p) {
         GhostAvatar ghostAvatar = findAvatar(id);
         if (ghostAvatar != null) {
-            // ghostAvatar.setPosition(position);
+            Vector3f pos = new Vector3f(game.getGrid()[p[0]][p[1]].getPosition());
+            pos.x += (game.getTileWidth()/3f);
+            pos.y = 3f;
+            pos.z -= (game.getTileHeight()/3);
+            ghostAvatar.setLocalLocation(pos);
         } else {
             System.out.println("unable to find ghost in list");
         }
