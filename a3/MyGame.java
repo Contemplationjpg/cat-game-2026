@@ -72,7 +72,6 @@ public class MyGame extends VariableFrameRateGame {
     private TextureImage ghostT;
 
     private TextureImage brick;
-    private TextureImage gas;
     private TextureImage purplebrick;
     private TextureImage bluebrick;
 
@@ -228,7 +227,6 @@ public class MyGame extends VariableFrameRateGame {
         // doltx = new TextureImage("Dolphin_HighPolyUV.jpg");
         doltx = new TextureImage("rat.png");
         brick = new TextureImage("brick1.jpg");
-        gas = new TextureImage("gaseous.jpg");
         bluebrick = new TextureImage("bluebrick.jpg");
         purplebrick = new TextureImage("purplebrick.jpg");
         grass = new TextureImage("grass.png");
@@ -767,7 +765,7 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public TextureImage getRockTexture() {
-        return gas;
+        return rocktx;
     }
 
     public Vector3f getPlayerPosition() {
