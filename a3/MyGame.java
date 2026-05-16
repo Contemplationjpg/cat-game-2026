@@ -455,7 +455,7 @@ public class MyGame extends VariableFrameRateGame {
         wm.initializeWaves(waves);
 
         // starts animation
-        catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
+        // catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
     }
 
     public void setEarParameters() {
@@ -845,13 +845,14 @@ public class MyGame extends VariableFrameRateGame {
             //     //dolS.stopAnimation();
             //     catS.stopAnimation();
             //     //dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
-            //     // catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
+            //     catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
             //     break;
 
-            case KeyEvent.VK_T:
-                //dolS.stopAnimation();
-                catS.stopAnimation();
-                break;
+            // case KeyEvent.VK_T:
+            //     //dolS.stopAnimation();
+            //     catS.stopAnimation();
+            //     catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.NONE, 0);
+            //     break;
             case KeyEvent.VK_P:
                 setToProgress = true;
                 initialStart = true;
