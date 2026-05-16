@@ -11,7 +11,7 @@ public class Wave1 extends Wave {
     private Boolean hasSentRound1 = false;
     private Boolean hasSentRound2 = false;
 
-    private final double spawnDelay = 0.5;
+    private final double spawnDelay = 1.5;
     private double lastSpawnTime;
 
     @Override

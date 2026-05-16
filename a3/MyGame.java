@@ -415,7 +415,7 @@ public class MyGame extends VariableFrameRateGame {
                if (grid[i][j].getTileType().getName().equals("unplacable")) {
                 Light newlight = new Light();
                 Vector3f tempPos = grid[i][j].getPosition();
-                tempPos.y = -50f;
+                tempPos.y = 15f;
                 newlight.setLocation(tempPos);
                 newlight.setDiffuse(1, 0, 0);
                 (engine.getSceneGraph()).addLight(newlight);
@@ -488,9 +488,13 @@ public class MyGame extends VariableFrameRateGame {
         //Make new waves
         Wave1 wave1 = new Wave1();
         Wave1 wave2 = new Wave1();
+        Wave1 wave3 = new Wave1();
+        Wave1 wave4 = new Wave1();
         //add waves to ArrayList
         waves.add(wave1);
         waves.add(wave2);
+        waves.add(wave3);
+        waves.add(wave4);
 
         wm.initializeWaves(waves);
     }
@@ -800,11 +804,11 @@ public class MyGame extends VariableFrameRateGame {
     }
 
     public ObjShape getRockShape() {
-        return sphereS;
+        return rockS;
     }
 
     public TextureImage getRockTexture() {
-        return gas;
+        return rocktx;
     }
 
     public Vector3f getPlayerPosition() {
