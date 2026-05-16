@@ -58,16 +58,14 @@ public class MyGame extends VariableFrameRateGame {
     private PhysicsObject terrP;
 
     private GameObject dol;
-    // private ObjShape dolS;
-    private AnimatedShape dolS;
-    private TextureImage doltx;
+    private ObjShape dolS;
+    //private AnimatedShape dolS;
 
     private GameObject cat;
     // private ObjShape catS;
     private AnimatedShape catS;
-    private TextureImage cattx;
+    private TextureImage doltx, cattx, bomberCattx, rocktx;
     private ObjShape bomberCatS;
-    private TextureImage bomberCattx;
 
     private GameObject ghost;
     private ObjShape ghostS;
@@ -83,7 +81,7 @@ public class MyGame extends VariableFrameRateGame {
     private GameObject testTables[][];
 
     private GameObject cursor;
-    private ObjShape cursorS;
+    private ObjShape cursorS, rockS;
     private TextureImage cursortx;
 
     private Light lightP1, lightP2, lightP3, lightH;
@@ -206,9 +204,9 @@ public class MyGame extends VariableFrameRateGame {
     @Override
     public void loadShapes() {
         // dolS = new ImportedModel("dolphinHighPoly.obj");
-        // dolS = new ImportedModel("rat.obj");
-        dolS = new AnimatedShape("rat.rkm", "rat.rks");
-        dolS.loadAnimation("WAG", "ratTailWag.rka");
+        dolS = new ImportedModel("rat.obj");
+        //dolS = new AnimatedShape("rat.rkm", "rat.rks");
+        //dolS.loadAnimation("WAG", "ratTailWag.rka");
 
         catS = new AnimatedShape("basicCat.rkm", "basicCat.rks");
         catS.loadAnimation("arm", "basicCatArm.rka");
@@ -220,6 +218,7 @@ public class MyGame extends VariableFrameRateGame {
         terrS = new TerrainPlane(1000); //pixes per axis = 1000x1000
 
         cursorS = new ImportedModel("cursor.obj");
+        rockS = new ImportedModel("rock.obj");
         bomberCatS = new ImportedModel("artilleryCat.obj");
     }
 
@@ -235,8 +234,8 @@ public class MyGame extends VariableFrameRateGame {
         grassHM = new TextureImage("grassHM.png");
         cattx = new TextureImage("fullCat.png");
         cursortx = new TextureImage("cursorTexture.png");
-        cursortx = new TextureImage("cursorTexture.png");
         bomberCattx = new TextureImage("bomberCat.png");
+        rocktx = new TextureImage("stone.png");
     }
 
     @Override
@@ -349,8 +348,9 @@ public class MyGame extends VariableFrameRateGame {
                 if ((grid[x][z].getTileType().getName()).equals("trail")) {
                     table.setTextureImage(purplebrick);
                 } else if (grid[x][z].getTileType().getName().equals("unplacable")) {
-                    table.setShape(cursorS);
-                    initialScale = (new Matrix4f()).scaling(0.25f);
+                    table.setTextureImage(rocktx);
+                    table.setShape(rockS);
+                    initialScale = (new Matrix4f()).scaling(1.5f);
                     table.setLocalScale(initialScale);
                 }
                 table.setLocalTranslation(initTrans);
@@ -651,7 +651,7 @@ public class MyGame extends VariableFrameRateGame {
         }
         pe.detectCollisions();
 
-        dolS.updateAnimation();
+        //dolS.updateAnimation();
         catS.updateAnimation();
 
     }
@@ -841,15 +841,15 @@ public class MyGame extends VariableFrameRateGame {
                 break;
 
             case KeyEvent.VK_R:
-                dolS.stopAnimation();
+                //dolS.stopAnimation();
                 catS.stopAnimation();
-                dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
+                //dolS.playAnimation("WAG", 0.5f, AnimatedShape.EndType.LOOP, 0);
                 catS.playAnimation("arm", 0.5f, AnimatedShape.EndType.LOOP, 0);
 
                 break;
 
             case KeyEvent.VK_T:
-                dolS.stopAnimation();
+                //dolS.stopAnimation();
                 catS.stopAnimation();
                 break;
             case KeyEvent.VK_P:

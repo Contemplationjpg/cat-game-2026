@@ -12,9 +12,9 @@ public class Enemy extends GameObject {
     private int nextTileOnPath = 1;
     private float speed = 1f;
     private boolean isAtEndOfPath = false;
-    private int health = 3;
+    private int health = 2;
     private int damageToPlayer = 5;
-    private int reward = 10;
+    private int reward = 15;
 
     public Enemy(GameObject p, ObjShape s, TextureImage t, MyGame g) {
         super(p, s, t);
